@@ -82,10 +82,18 @@ function bursting_neuron(; u0=[-24.4694, 0.0386, 0.0231],
     return ds
 end
 
-function lorenz(u0, ρ; σ=10.0, β=8/3)
+function lorenz(;u0=[], ρ=28, σ=10.0, β=8/3)
     if !isempty(u0)
         return Systems.lorenz(u0, σ=σ, ρ=ρ, β=β)
     else
         return Systems.lorenz(ρ=ρ)
     end
+end
+
+
+function ns_lorenz!(du, u, p, t)
+    σ, ρ, β = p
+    du[1] = σ(t) * (u[2] - u[1])
+    du[2] = u[1] * (ρ(t) - u[3]) - u[2]
+    du[3] = u[1] * u[2] - β(t) * u[3]
 end

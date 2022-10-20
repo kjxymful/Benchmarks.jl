@@ -1,8 +1,13 @@
-# include("src/Benchmarks.jl")
-# using .Benchmarks
-
 using Benchmarks
 
+# see doc for available options
 
-# std_3d_benchmark("lorenz_limit_cycle")
-# bursting_neuron_regimes()
+# create standard benchmarks
+std_3d_benchmark("standard_lorenz")
+
+# create data for different bursting neuron regimes
+bursting_neuron_regimes()
+
+# create non stationary benchmark systems
+# so far only lorenz systems were implemented
+ns_3d_benchmark("ExplodingLorenz")
