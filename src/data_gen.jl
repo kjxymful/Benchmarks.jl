@@ -36,27 +36,29 @@ SAVE : Specifies whether the timeseries is saved or not (BOOL)
 
 MARKER: Show data points in plot (BOOL)
 
+process_noise_level : The ratio of process noise, default 0 (Float)
+
 Returns
 -------
 time series : Time series of the specified system (AbstractMatrix)
 
 """
-function std_3d_benchmark(System::String; num_T=15000, ΔT=0.01, transient_T=2000, plot_title="", PLOT=true, save_dir="", SAVE=true, MARKER=false)
+function std_3d_benchmark(System::String; num_T=15000, ΔT=0.01, transient_T=2000, plot_title="", PLOT=true, save_dir="", SAVE=true, MARKER=false, process_noise_level=0.0)
     valid_systems = ["standard_bursting", "standard_lorenz", "bursting_limit_cycle", "lorenz_limit_cycle"]
     @assert System in valid_systems "$System is not a valid System: $valid_systems"
 
     if System == "standard_bursting"
-        ds = bursting_neuron()
+        ds = bursting_neuron(process_noise=process_noise_level)
         μ = 10.2
     elseif System == "standard_lorenz"
         μ = 28.0
-        ds = lorenz()
+        ds = lorenz(process_noise=process_noise_level)
     elseif System == "bursting_limit_cycle"
-        ds = bursting_neuron(u0=[-60.0, 0.0386, 0.0231], gₙₘ₀ₐ=10.0)
+        ds = bursting_neuron(u0=[-60.0, 0.0386, 0.0231], gₙₘ₀ₐ=10.0, process_noise=process_noise_level)
         μ = 10.0
     elseif System == "lorenz_limit_cycle"
         μ = 24.0
-        ds = lorenz()
+        ds = lorenz(process_noise=process_noise_level)
     end
     tseries = gen_series(ds, num_T, ΔT, transient_T)
     time = 0:ΔT:(num_T*ΔT)
@@ -104,17 +106,19 @@ save_dir : directory to save the data in, default data/benchmarks (String)
 
 SAVE : Specifies whether the timeseries is saved or not, default true (BOOL)
 
+process_noise_level : The ratio of process noise, default 0 (Float)
+
 Returns
 -------
 time series : Time series of the specified system (AbstractMatrix)
 
 """
-function bursting_neuron_regimes(; num_T=15000, ΔT=0.01, transient_T=2000, PLOT=true, save_dir="", SAVE=true)
+function bursting_neuron_regimes(; num_T=15000, ΔT=0.01, transient_T=2000, PLOT=true, save_dir="", SAVE=true, process_noise_level=0.0)
     μₛ = [3.0, 5.0, 7.0, 9.0, 10.0, 10.2]
 
     tseries = Vector{AbstractMatrix}()
     for μ in μₛ
-        ds = bursting_neuron(u0=[-60.0, 0.0386, 0.0231], gₙₘ₀ₐ=μ)
+        ds = bursting_neuron(u0=[-60.0, 0.0386, 0.0231], gₙₘ₀ₐ=μ, process_noise=process_noise_level)
         ts = gen_series(ds, num_T, ΔT, transient_T)
         ts = StatsBase.standardize(ZScoreTransform, ts, dims=1)
 
@@ -154,6 +158,9 @@ well known chaotic attractor; ρ=22->28
 
 - ShrinkingLorenz : Starts with the chaotic attractor and shrinks and shifts it a bit; ρ=28->23, σ=10->5, β=8/3->0.5
 
+- PaperLorenzBigChange : The ns system used in Patel et al. 2022 with a quick parameter change
+
+- PaperLorenzSmallChange : The ns system used in Patel et al. 2022 with a slow parameter change
 
 Parameters
 ----------
@@ -174,19 +181,26 @@ save_dir : directory to save the data in, default data/benchmarks (String)\n
 
 SAVE : Specifies whether the timeseries is saved or not, default true (BOOL)\n
 
+process_noise_level : The ratio of process noise, default 0 (Float)
+
 Returns
 -------
 time series : Time series of the specified system (AbstractMatrix)
 """
-function ns_3d_benchmark(System::String, ; p_change=[linear, linear, linear], num_T=15000, ΔT=0.01, transient_T=2000, plot_title="", PLOT=true, save_dir="", SAVE=true)
-    valid_systems = ["ExplodingLorenz", "ShiftingLorenz", "ShrinkingLorenz"]
+function ns_3d_benchmark(System::String, ; p_change=[linear, linear, linear], num_T=15000, ΔT=0.01, transient_T=2000, plot_title="", PLOT=true, save_dir="", SAVE=true, process_noise_level=0.0)
+    valid_systems = ["ExplodingLorenz", "ShiftingLorenz", "ShrinkingLorenz", "PaperLorenzBigChange", "PaperLorenzSmallChange"]
     @assert System in valid_systems "$System is not a valid System: $valid_systems"
 
     tmax = (num_T + transient_T) * ΔT
 
-    ns_model = ns_lorenz_systems(System, p_change, tmax)
+    ns_model = ns_lorenz_systems(System, p_change, tmax, process_noise_level)
 
-    tseries = generate_ns_trajectories(ns_model, tmax, transient_T, Δt=ΔT, PLOT=PLOT)
+    t₀ = 0.0
+    if occursin("Paper", System)
+        t₀ = -600.0 - transient_T * ΔT
+        tmax = 200.0
+    end
+    tseries = generate_ns_trajectories(ns_model, tmax, transient_T, Δt=ΔT, PLOT=PLOT, t₀=t₀, plot_title=plot_title)
 
     tseries = StatsBase.standardize(ZScoreTransform, tseries, dims=1)
 

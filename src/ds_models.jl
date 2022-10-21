@@ -20,6 +20,7 @@ using DynamicalSystems
     kₘ = p[16]
     τₕ = p[17]
     gₙₘ₀ₐ = p[18]
+    process_noise = p[19]
     Eₙₘ₀ₐ = 0 # as far as i could find
 
     V = u[1]
@@ -34,9 +35,9 @@ using DynamicalSystems
            -
            gₖ * n * (V - Eₖ) - gₘ * h * (V - Eₖ)
            -
-           gₙₘ₀ₐ * s∞(V) * (V - Eₙₘ₀ₐ)) / Cₘ
-    du2 = (n∞(V, Vₕₖ, kₖ) - n) / τₙ
-    du3 = (h∞(V, Vₕₘ, kₘ) - h) / τₕ
+           gₙₘ₀ₐ * s∞(V) * (V - Eₙₘ₀ₐ)) / Cₘ + ϵ(process_noise)
+    du2 = (n∞(V, Vₕₖ, kₖ) - n) / τₙ + ϵ(process_noise)/10
+    du3 = (h∞(V, Vₕₘ, kₘ) - h) / τₕ + ϵ(process_noise)/10
     return SVector{3}(du1, du2, du3)
 end
 
@@ -76,24 +77,31 @@ function bursting_neuron(; u0=[-24.4694, 0.0386, 0.0231],
     Vₕₘ=-15,
     kₘ=5,
     τₕ=200,
-    gₙₘ₀ₐ=10.2)
-    p = [I, Cₘ, gₗ, Eₗ, gₙₐ, Eₙₐ, Vₕₙₐ, kₙₐ, gₖ, Eₖ, Vₕₖ, kₖ, τₙ, gₘ, Vₕₘ, kₘ, τₕ, gₙₘ₀ₐ]
+    gₙₘ₀ₐ=10.2,
+    process_noise=0.0)
+    p = [I, Cₘ, gₗ, Eₗ, gₙₐ, Eₙₐ, Vₕₙₐ, kₙₐ, gₖ, Eₖ, Vₕₖ, kₖ, τₙ, gₘ, Vₕₘ, kₘ, τₕ, gₙₘ₀ₐ, process_noise]
     ds = ContinuousDynamicalSystem(loop_burstn, u0, p)
     return ds
 end
 
-function lorenz(;u0=[], ρ=28, σ=10.0, β=8/3)
-    if !isempty(u0)
-        return Systems.lorenz(u0, σ=σ, ρ=ρ, β=β)
-    else
-        return Systems.lorenz(ρ=ρ)
-    end
+@inline @inbounds function loop_lorenz(u,p,t)
+    σ, ρ, β, process_noise = p
+    du[1] = σ * (u[2] - u[1]) + ϵ(process_noise)
+    du[2] = u[1] * (ρ - u[3]) - u[2] + ϵ(process_noise)
+    du[3] = u[1] * u[2] - β * u[3] + ϵ(process_noise)
+end
+
+function lorenz(; u0=[0.5,0.5,0.5], ρ=28.0, σ=10.0, β=8/3, process_noise=0.0)
+    p = [σ, ρ, β, process_noise]
+    return ContinuousDynamicalSystem(loop_lorenz, u0, p)
 end
 
 
-function ns_lorenz!(du, u, p, t)
+function ns_lorenz!(du, u, p, t; process_noise=0.0)
     σ, ρ, β = p
-    du[1] = σ(t) * (u[2] - u[1])
-    du[2] = u[1] * (ρ(t) - u[3]) - u[2]
-    du[3] = u[1] * u[2] - β(t) * u[3]
+    du[1] = σ(t) * (u[2] - u[1]) + ϵ(process_noise)
+    du[2] = u[1] * (ρ(t) - u[3]) - u[2] + ϵ(process_noise)
+    du[3] = u[1] * u[2] - β(t) * u[3] + ϵ(process_noise)
 end
+
+ϵ(process_noise::AbstractFloat) = randn()*process_noise
