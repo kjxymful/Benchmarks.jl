@@ -1,6 +1,6 @@
 using DifferentialEquations
 
-function gen_series(ds::GeneralizedDynamicalSystem, num_T::Int, ΔT::AbstractFloat, transient_T::Int)
+function generate_trajetories(ds::GeneralizedDynamicalSystem, num_T::Int, ΔT::AbstractFloat, transient_T::Int)
     T_end = num_T * ΔT
     ts = trajectory(ds, T_end; Δt=ΔT, Ttr=transient_T)
     return Matrix(ts)
@@ -20,9 +20,9 @@ PLOT : If a plot should be done, default true (BOOL)
 
 *Plotting to Figures/*
 """
-function generate_ns_trajectories(ns_model::ns_systems,tmax::AbstractFloat, skip_steps::Int;Δt=0.01, t₀=0.0, PLOT=true, plot_title="")
+function generate_trajectories(model::AbstractDynamicalSystem,tmax::AbstractFloat, skip_steps::Int;Δt=0.01, t₀=0.0, PLOT=true, plot_title="")
     tspan = (t₀, tmax)
-    prob = ODEProblem(ns_model.sys, ns_model.u0, tspan, ns_model.params)
+    prob = ODEProblem(model.sys, model.u0, tspan, model.params)
     sol = solve(prob)
 
     u = [sol(t) for t in (t₀+skip_steps*Δt):Δt:tmax]
@@ -31,23 +31,22 @@ function generate_ns_trajectories(ns_model::ns_systems,tmax::AbstractFloat, skip
     t = collect(t₀:0.01:(tmax-skip_steps*Δt))
 
     if PLOT
-        title = isempty(plot_title) ? ns_model.name : plot_title
-        if occursin("Paper", ns_model.name)
+        if occursin("Paper", model.name)
             uS0 = u[findall(x->x<=0,t),:]
             uB0 = u[findall(x->x>0,t),:]
             p = plot3d(uS0[:, 1], uS0[:, 2], uS0[:, 3],
                 xlabel="x", ylabel="y", zlabel="z",
-                lc=:red,label="t\$\\leq\$0",linealpha=1, title =title)
+                lc=:red,label="t\$\\leq\$0",linealpha=1, title=plot_title)
             plot3d!(p, uB0[:,1],uB0[:,2],uB0[:,3],lc=:black,label="t>0",linealpha=0.8)
         else
             p = plot3d(u[1:end, 1], u[1:end, 2], u[1:end, 3],
                 xlabel="x", ylabel="y", zlabel="z",
                 lc=cgrad(:viridis), line_z=t[1:end] * 100,
                 colorbar_title=" \n \ntime",
-                right_margin=1.5Plots.mm, title=title)
+                right_margin=1.5Plots.mm, title=plot_title)
         end
         mkpath("Figures/")
-        savefig(p, "Figures/$(ns_model.name).png")
+        savefig(p, "Figures/$(model.name).png")
     end
     return u
 end

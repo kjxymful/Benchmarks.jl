@@ -60,15 +60,14 @@ function std_3d_benchmark(System::String; num_T=15000, ΔT=0.01, transient_T=200
         μ = 24.0
         ds = lorenz(process_noise=process_noise_level)
     end
-    tseries = gen_series(ds, num_T, ΔT, transient_T)
+    tmax = (transient_T+num_T)*ΔT
+    tseries = generate_trajectories(ds, tmax, transient_T, Δt=ΔT, PLOT=false)
+
     time = 0:ΔT:(num_T*ΔT)
 
-    tseries = StatsBase.standardize(ZScoreTransform, tseries, dims=1)
-
     if PLOT
-        title = isempty(plot_title) ? System : plot_title
         marker = MARKER ? :d : false
-        p = plot3d(tseries[:, 1], tseries[:, 2], tseries[:, 3], title=title,
+        p = plot3d(tseries[:, 1], tseries[:, 2], tseries[:, 3], title=plot_title,
             xlabel="x", ylabel="y", zlabel="z",
             lc=cgrad(:viridis), line_z=time,
             colorbar_title=" \n \ntime",
@@ -117,10 +116,10 @@ function bursting_neuron_regimes(; num_T=15000, ΔT=0.01, transient_T=2000, PLOT
     μₛ = [3.0, 5.0, 7.0, 9.0, 10.0, 10.2]
 
     tseries = Vector{AbstractMatrix}()
+    tmax = (num_T+transient_T)*ΔT
     for μ in μₛ
         ds = bursting_neuron(u0=[-60.0, 0.0386, 0.0231], gₙₘ₀ₐ=μ, process_noise=process_noise_level)
-        ts = gen_series(ds, num_T, ΔT, transient_T)
-        ts = StatsBase.standardize(ZScoreTransform, ts, dims=1)
+        ts = generate_trajectories(ds, tmax, transient_T, Δt=ΔT, PLOT=false)
 
         push!(tseries, ts)
         if SAVE
@@ -135,7 +134,7 @@ function bursting_neuron_regimes(; num_T=15000, ΔT=0.01, transient_T=2000, PLOT
         g = plot(ps..., layout=6,
             title=["\n3" "\$g_{nmda}\$ as bifurcation parameter\n5" "\n7" "\n9" "\n10" "\n10.2"], titlefont=font(11),
             legend=nothing,
-            plot_title="3d bursting neuron regimes", plot_titlevspan=0.08,
+            plot_title="bursting neuron regimes", plot_titlevspan=0.08,
             size=(500, 500))
         mkpath("Figures/")
         savefig(g, "Figures/bursting_neuron_regimes.png")
@@ -200,9 +199,7 @@ function ns_3d_benchmark(System::String, ; p_change=[linear, linear, linear], nu
         t₀ = -600.0 - transient_T * ΔT
         tmax = 200.0
     end
-    tseries = generate_ns_trajectories(ns_model, tmax, transient_T, Δt=ΔT, PLOT=PLOT, t₀=t₀, plot_title=plot_title)
-
-    tseries = StatsBase.standardize(ZScoreTransform, tseries, dims=1)
+    tseries = generate_trajectories(ns_model, tmax, transient_T, Δt=ΔT, PLOT=PLOT, t₀=t₀, plot_title=plot_title)
 
     if SAVE
         dir_path = isempty(save_dir) ? "data/benchmarks/" : save_dir
@@ -212,3 +209,80 @@ function ns_3d_benchmark(System::String, ; p_change=[linear, linear, linear], nu
     return tseries
 end
 
+
+"""
+create a benchmark system in trial form
+
+implemented Systems
+- trial_lorenz : a lorenz with parameter shifting from 22->28 across trials
+
+Parameter
+---------
+System : The name of the benchmark system (String)
+num_Trials : Number of trials (Int)
+
+Kwargs
+------
+num_T : number of timesteps, default 15000 (Int)
+
+ΔT : time between steps, default 0.01 (Float)
+
+transient_T : timesteps used as start up to avoid transients, default 2000 (Int)
+
+plot_title : Title for the plot, default: same as System (String)
+
+PLOT : Specifies whether a plot is done, default true (BOOL)
+
+save_dir : directory to save the data in, default data/benchmarks (String)
+
+SAVE : Specifies whether the timeseries is saved or not (BOOL)
+
+process_noise_level : The ratio of process noise, default 0 (Float)
+
+lorenz_trial_sys : The system used to split the lorenz (String)
+
+Returns
+-------
+time series : Time series of the specified system (AbstractMatrix)
+"""
+function trial_benchmark(System::String, num_Trials::Int;seq_length=1000, ΔT=0.01, transient_T=2000, plot_title="",PLOT=true, save_dir="", SAVE=true, process_noise_level=0.0,lorenz_sys="")
+    valid_systems = ["trial_lorenz", "split_lorenz"]
+    @assert System in valid_systems "$System not in valid_systems:$valid_systems"
+    @assert num_Trials>10 "at least 10 trials need to be in the set"
+
+    if System == "trial_lorenz"
+        ts = trial_ns_lorenz(num_Trials, seq_length, ΔT, 22f0,28f0, process_noise = process_noise_level,transient_T=transient_T)
+    elseif System == "split_lorenz"
+        valid_systems = ["ExplodingLorenz", "ShiftingLorenz", "ShrinkingLorenz", "PaperLorenzBigChange", "PaperLorenzSmallChange"]
+        @assert lorenz_sys in valid_systems "$lorenz_sys is not a valid System: $valid_systems"
+
+        ts = split_lorenz_trials(lorenz_sys, num_Trials, seq_length, transient_T, ΔT, process_noise=process_noise_level)
+    end
+
+    if PLOT
+        plot_ts = ts
+        if num_Trials>10
+            println("only 10 random trials are plotted")
+            plot_idx = sort!(sample(2:1:num_Trials-1, 8, replace=false))
+            pushfirst!(plot_idx,1)
+            push!(plot_idx,num_Trials)
+            plot_ts = plot_ts[plot_idx]
+        end
+
+
+        plots = (plot3d(plot_ts[i][:,1],plot_ts[i][:,2],plot_ts[i][:,3], ticks=false, legend=nothing, title="\n\n"*string(plot_idx[i]), titlefont=font(10)) for i in 1:10)
+        plot(plots..., layout=grid(2,5), 
+            plot_title=plot_title*"\ntrials",
+            plot_titlevspan=0.05)
+        mkpath("Figures/")
+        savefig("Figures/lorenz_trials.png")
+    end
+
+    if SAVE
+        dir_path = isempty(save_dir) ? "data/benchmarks/" : save_dir
+        mkpath(dir_path)
+        num_Trials = System == "trial_lorenz" ? num_Trials+=1 : num_Trials
+        ts = reshape(reduce(hcat,ts), num_Trials, seq_length+1,3)
+        npzwrite("data/benchmarks/$System.npy", ts)
+    end
+end
