@@ -211,10 +211,13 @@ end
 
 
 """
+    trial_benchmark(System::String, num_Trials::Int;seq_length=1000, ΔT=0.01, transient_T=2000, plot_title="",PLOT=true, save_dir="", SAVE=true, process_noise_level=0.0,lorenz_sys="")
+
 create a benchmark system in trial form
 
 implemented Systems
 - trial_lorenz : a lorenz with parameter shifting from 22->28 across trials
+- split_lorenz : a specified ns lorenz split into num_trials
 
 Parameter
 ---------
