@@ -27,19 +27,19 @@ function generate_trajectories(model::AbstractDynamicalSystem,tmax::AbstractFloa
 
     u = [sol(t) for t in (t₀+skip_steps*Δt):Δt:tmax]
     u = permutedims(hcat(u...))
-    u = StatsBase.standardize(ZScoreTransform, u, dims=1)
     t = collect(t₀:0.01:(tmax-skip_steps*Δt))
+    u_std = StatsBase.standardize(ZScoreTransform, u, dims=1)
 
     if PLOT
         if occursin("Paper", model.name)
-            uS0 = u[findall(x->x<=0,t),:]
-            uB0 = u[findall(x->x>0,t),:]
+            uS0 = u_std[findall(x->x<=0,t),:]
+            uB0 = u_std[findall(x->x>0,t),:]
             p = plot3d(uS0[:, 1], uS0[:, 2], uS0[:, 3],
                 xlabel="x", ylabel="y", zlabel="z",
                 lc=:red,label="t\$\\leq\$0",linealpha=1, title=plot_title)
             plot3d!(p, uB0[:,1],uB0[:,2],uB0[:,3],lc=:black,label="t>0",linealpha=0.8)
         else
-            p = plot3d(u[1:end, 1], u[1:end, 2], u[1:end, 3],
+            p = plot3d(u_std[1:end, 1], u_std[1:end, 2], u_std[1:end, 3],
                 xlabel="x", ylabel="y", zlabel="z",
                 lc=cgrad(:viridis), line_z=t[1:end] * 100,
                 colorbar_title=" \n \ntime",

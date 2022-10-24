@@ -1,6 +1,6 @@
 {
-    "name": "split_lorenz",
-    "process_noise_level" : 0.0,
+    "name": "bursting_neuron_regimes",
+    "process_noise_level" : 0.01,
     "num_T" : 15000,
     "delta_T" : 0.01,
     "transient_T" : 2000,

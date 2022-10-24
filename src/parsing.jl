@@ -81,7 +81,7 @@ function parse_commandline()
 end
 
 load_defaults() =
-    convert_to_Float32(JSON.parsefile(joinpath(pwd(), "settings", "defaults.json")))
+    convert_to_Float32(JSON.parsefile(joinpath(pwd(), "settings", "benchmark_defaults.json")))
 
 function convert_to_Float32(dict::Dict)
     for (key, val) in dict

@@ -24,7 +24,7 @@ Returns
 -------
 Initialized ns_systems for the lorenz ns benchmarks
 """
-function ns_lorenz_systems(sys::String, par_fun::AbstractVector, tmax::AbstractFloat, process_noise_level::AbstractFloat; u0=[0.5, 0.5, 0.5])
+function ns_lorenz_systems(sys::String, par_fun::AbstractVector, tmax::AbstractFloat, process_noise_level::Vector{Float64}; u0=[0.5, 0.5, 0.5])
     valid_models = ["ExplodingLorenz", "ShrinkingLorenz", "ShiftingLorenz","PaperLorenzBigChange", "PaperLorenzSmallChange"]
     if !(sys in valid_models)
         throw("$sys is not a valid system:$valid_models")

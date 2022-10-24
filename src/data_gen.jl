@@ -2,6 +2,7 @@ using DynamicalSystems
 using Plots
 using NPZ: npzwrite
 using StatsBase
+using Statistics
 
 """
     std_3d_benchmark(System::String; num_T=15000, ΔT=0.01, transient_T=2000, plot_title="", PLOT=true, save_dir="", SAVE=true, MARKERS=false)
@@ -47,21 +48,29 @@ function std_3d_benchmark(System::String; num_T=15000, ΔT=0.01, transient_T=200
     valid_systems = ["standard_bursting", "standard_lorenz", "bursting_limit_cycle", "lorenz_limit_cycle"]
     @assert System in valid_systems "$System is not a valid System: $valid_systems"
 
-    if System == "standard_bursting"
-        ds = bursting_neuron(process_noise=process_noise_level)
-        μ = 10.2
-    elseif System == "standard_lorenz"
-        μ = 28.0
-        ds = lorenz(process_noise=process_noise_level)
-    elseif System == "bursting_limit_cycle"
-        ds = bursting_neuron(u0=[-60.0, 0.0386, 0.0231], gₙₘ₀ₐ=10.0, process_noise=process_noise_level)
-        μ = 10.0
-    elseif System == "lorenz_limit_cycle"
-        μ = 24.0
-        ds = lorenz(process_noise=process_noise_level)
-    end
     tmax = (transient_T+num_T)*ΔT
-    tseries = generate_trajectories(ds, tmax, transient_T, Δt=ΔT, PLOT=false)
+
+    nrun = process_noise_level == 0 ? 1 : 2
+    std_ = ones(3)
+    for run in 1:nrun
+        process_noise = run == 1 ? zeros(3) : process_noise_level.*std_
+        if System == "standard_bursting"
+            ds = bursting_neuron(process_noise=process_noise)
+            μ = 10.2
+        elseif System == "standard_lorenz"
+            μ = 28.0
+            ds = lorenz(process_noise=process_noise)
+        elseif System == "bursting_limit_cycle"
+            ds = bursting_neuron(u0=[-60.0, 0.0386, 0.0231], gₙₘ₀ₐ=10.0, process_noise=process_noise)
+            μ = 10.0
+        elseif System == "lorenz_limit_cycle"
+            μ = 24.0
+            ds = lorenz(process_noise=process_noise)
+        end
+        tseries = generate_trajectories(ds, tmax, transient_T, Δt=ΔT, PLOT=false)
+        std_ = [std(tseries[:,i]) for i in axes(tseries,2)]
+    end
+    tseries = StatsBase.standardize(ZScoreTransform, tseries, dims=1)
 
     time = 0:ΔT:(num_T*ΔT)
 
@@ -115,11 +124,19 @@ time series : Time series of the specified system (AbstractMatrix)
 function bursting_neuron_regimes(; num_T=15000, ΔT=0.01, transient_T=2000, PLOT=true, save_dir="", SAVE=true, process_noise_level=0.0)
     μₛ = [3.0, 5.0, 7.0, 9.0, 10.0, 10.2]
 
+    nrun = process_noise_level == 0 ? 1 : 2
     tseries = Vector{AbstractMatrix}()
     tmax = (num_T+transient_T)*ΔT
     for μ in μₛ
-        ds = bursting_neuron(u0=[-60.0, 0.0386, 0.0231], gₙₘ₀ₐ=μ, process_noise=process_noise_level)
-        ts = generate_trajectories(ds, tmax, transient_T, Δt=ΔT, PLOT=false)
+        std_ = ones(3)
+        for run in 1:nrun
+            process_noise = run == 1 ? zeros(3) : process_noise_level.*std_
+            @show process_noise
+            ds = bursting_neuron(u0=[-60.0, 0.0386, 0.0231], gₙₘ₀ₐ=μ, process_noise=process_noise)
+            ts = generate_trajectories(ds, tmax, transient_T, Δt=ΔT, PLOT=false)
+            std_ = [std(ts[:,i]) for i in axes(ts,2)]
+        end
+        ts = StatsBase.standardize(ZScoreTransform, ts, dims=1)
 
         push!(tseries, ts)
         if SAVE
@@ -190,16 +207,24 @@ function ns_3d_benchmark(System::String, ; p_change=[linear, linear, linear], nu
     valid_systems = ["ExplodingLorenz", "ShiftingLorenz", "ShrinkingLorenz", "PaperLorenzBigChange", "PaperLorenzSmallChange"]
     @assert System in valid_systems "$System is not a valid System: $valid_systems"
 
-    tmax = (num_T + transient_T) * ΔT
-
-    ns_model = ns_lorenz_systems(System, p_change, tmax, process_noise_level)
-
     t₀ = 0.0
+    tmax = (num_T + transient_T) * ΔT
+    nrun = process_noise_level == 0 ? 1 : 2
     if occursin("Paper", System)
         t₀ = -600.0 - transient_T * ΔT
         tmax = 200.0
     end
-    tseries = generate_trajectories(ns_model, tmax, transient_T, Δt=ΔT, PLOT=PLOT, t₀=t₀, plot_title=plot_title)
+
+    std_ = ones(3)
+    for run in 1:nrun
+        process_noise = run == 1 ? zeros(3) : process_noise_level.*std_
+
+        ns_model = ns_lorenz_systems(System, p_change, tmax, process_noise)
+
+        tseries = generate_trajectories(ns_model, tmax, transient_T, Δt=ΔT, PLOT=PLOT, t₀=t₀, plot_title=plot_title)
+        std_ = [std(tseries[:,i]) for i in axes(tseries,2)]
+    end
+    tseries = StatsBase.standardize(ZScoreTransform, tseries, dims=1)
 
     if SAVE
         dir_path = isempty(save_dir) ? "data/benchmarks/" : save_dir
@@ -259,7 +284,7 @@ function trial_benchmark(System::String, num_Trials::Int;seq_length=1000, ΔT=0.
         valid_systems = ["ExplodingLorenz", "ShiftingLorenz", "ShrinkingLorenz", "PaperLorenzBigChange", "PaperLorenzSmallChange"]
         @assert lorenz_sys in valid_systems "$lorenz_sys is not a valid System: $valid_systems"
 
-        ts = split_lorenz_trials(lorenz_sys, num_Trials, seq_length, transient_T, ΔT, process_noise=process_noise_level)
+        ts = split_lorenz_trials(lorenz_sys, num_Trials, seq_length, transient_T, ΔT, process_noise_level=process_noise_level)
     end
 
     if PLOT

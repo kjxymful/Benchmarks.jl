@@ -18,7 +18,7 @@ from directory do
 ```
 julia --project generate_benchmarks.jl
 ```
-with arguments specified in settings/defaults.json
+with arguments specified in settings/benchmark_defaults.json, i.e. you need a folder settings with benchmark_defaults.json in the parent directory
 
 or in commandline with
 ```
