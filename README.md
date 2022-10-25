@@ -26,6 +26,14 @@ julia --project generate_benchmarks.jl --kwarg values
 ```
 choose the benchmark system with --name 
 
+#### Usage in scripts
+```
+using Benchmarks
+
+generate_benchmarks(parse_commandline())
+```
+that's it, adjust settings in settings/benchmark_defaults.json
+
 If you want to create your own system, use the Dynamical Systems in either src/ds_models.jl, src/ns_models.jl with your parameters, and generate a series with generate_trajectories in src/utils.jl
 
 ## Implemented Systems
