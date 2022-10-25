@@ -5,12 +5,12 @@ Create the most commonly used Dynamical Systems Benchmark systems
 ## Getting started
 Clone the directory, go to directory, open the package manager in the Julia REPL using `"]"`, and add the package:
 ```
-(@v1.7) pkg> add .
+(@v1.8) pkg> add .
 ```
 
 Or enter the package manager in the Juila REPL, and add the package with:
 ```
-(@v1.7) pkg> add github_link
+(@v1.8) pkg> add github_link
 ```
 
 ## Generate Data
