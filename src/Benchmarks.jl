@@ -13,7 +13,7 @@ include("trial_ns.jl")
 export trial_ns_lorenz,split_lorenz_trials
 
 include("parsing.jl")
-export parse_commandline
+export parse_commandline, generate_benchmarks
 
 include("data_gen.jl")
 export std_3d_benchmark, bursting_neuron_regimes, ns_3d_benchmark, trial_benchmark

@@ -131,7 +131,7 @@ function bursting_neuron_regimes(; num_T=15000, ΔT=0.01, transient_T=2000, PLOT
         std_ = ones(3)
         for run in 1:nrun
             process_noise = run == 1 ? zeros(3) : process_noise_level.*std_
-            @show process_noise
+
             ds = bursting_neuron(u0=[-60.0, 0.0386, 0.0231], gₙₘ₀ₐ=μ, process_noise=process_noise)
             ts = generate_trajectories(ds, tmax, transient_T, Δt=ΔT, PLOT=false)
             std_ = [std(ts[:,i]) for i in axes(ts,2)]
