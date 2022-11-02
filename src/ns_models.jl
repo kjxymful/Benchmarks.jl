@@ -46,7 +46,7 @@ function ns_lorenz_systems(sys::String, par_fun::AbstractVector, tmax::AbstractF
             σ_final = σ_init
             β_final = β_init
             ρ_final = ρ_init
-            ρ_init = 22.0
+            ρ_init = 24.0
         elseif sys == "PaperLorenzBigChange"
             σ_final = σ_init
             β_final = β_init

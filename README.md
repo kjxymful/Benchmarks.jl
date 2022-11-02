@@ -48,7 +48,7 @@ If you want to create your own system, use the Dynamical Systems in either src/d
 
 ### Non-Stationary Benchmarks
 - ExplodingLorenz : Starts with a limit cycle and ends in the 
-well known chaotic attractor; ρ=22->28
+well known chaotic attractor; ρ=22->28 (not a very stable system, i.e. sensitive to initial conditions)
 - ShiftingLorenz : Starts with the chaotic attractor and shifts it "forward"; ρ=28->22
 - ShrinkingLorenz : Starts with the chaotic attractor and shrinks and shifts it a bit; ρ=28->23, σ=10->5, β=8/3->0.5
 - PaperLorenzBigChange : The ns system used in Patel et al. 2022 with a quick parameter change

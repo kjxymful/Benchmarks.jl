@@ -20,8 +20,9 @@ PLOT : If a plot should be done, default true (BOOL)
 
 *Plotting to Figures/*
 """
-function generate_trajectories(model::AbstractDynamicalSystem,tmax::AbstractFloat, skip_steps::Int;Δt=0.01, t₀=0.0, PLOT=true, plot_title="")
+function generate_trajectories(model::AbstractDynamicalSystem,tmax::AbstractFloat, skip_steps::Int;Δt=0.01, t₀=0.0, PLOT=true, plot_title="", eval=false, eval_run=0)
     tspan = (t₀, tmax)
+
     prob = ODEProblem(model.sys, model.u0, tspan, model.params)
     sol = solve(prob)
 
@@ -45,8 +46,13 @@ function generate_trajectories(model::AbstractDynamicalSystem,tmax::AbstractFloa
                 colorbar_title=" \n \ntime",
                 right_margin=1.5Plots.mm, title=plot_title)
         end
-        mkpath("Figures/")
-        savefig(p, "Figures/$(model.name).png")
+        if eval
+            mkpath("Figures/eval_$(model.name)")
+            savefig(p, "Figures/eval_$(model.name)/$eval_run.png")
+        else
+            mkpath("Figures/")
+            savefig(p, "Figures/$(model.name).png")
+        end
     end
     return u
 end

@@ -7,7 +7,7 @@ include("ns_models.jl")
 export ns_lorenz_systems
 
 include("utils.jl")
-export gen_path, save_series, generate_trajetories, generate_trajectories, sigmoid, linear, exponential
+export gen_path, save_series, generate_trajetories, sigmoid, linear, exponential
 
 include("trial_ns.jl")
 export trial_ns_lorenz,split_lorenz_trials

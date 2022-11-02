@@ -203,7 +203,7 @@ Returns
 -------
 time series : Time series of the specified system (AbstractMatrix)
 """
-function ns_3d_benchmark(System::String, ; p_change=[linear, linear, linear], num_T=15000, ΔT=0.01, transient_T=2000, plot_title="", PLOT=true, save_dir="", SAVE=true, process_noise_level=0.0)
+function ns_3d_benchmark(System::String, ; p_change=[linear, linear, linear], num_T=15000, ΔT=0.01, transient_T=2000, plot_title="", PLOT=true, save_dir="", SAVE=true, process_noise_level=0.0,u0=nothing, eval=false, eval_run=0)
     valid_systems = ["ExplodingLorenz", "ShiftingLorenz", "ShrinkingLorenz", "PaperLorenzBigChange", "PaperLorenzSmallChange"]
     @assert System in valid_systems "$System is not a valid System: $valid_systems"
 
@@ -214,14 +214,14 @@ function ns_3d_benchmark(System::String, ; p_change=[linear, linear, linear], nu
         t₀ = -600.0 - transient_T * ΔT
         tmax = 200.0
     end
-
+    u0 = u0 === nothing ? [0.5,0.5,0.5] : u0
     std_ = ones(3)
     for run in 1:nrun
         process_noise = run == 1 ? zeros(3) : process_noise_level.*std_
 
-        ns_model = ns_lorenz_systems(System, p_change, tmax, process_noise)
+        ns_model = ns_lorenz_systems(System, p_change, tmax, process_noise, u0=u0)
 
-        tseries = generate_trajectories(ns_model, tmax, transient_T, Δt=ΔT, PLOT=PLOT, t₀=t₀, plot_title=plot_title)
+        tseries = generate_trajectories(ns_model, tmax, transient_T, Δt=ΔT, PLOT=PLOT, t₀=t₀, plot_title=plot_title, eval=eval, eval_run=eval_run)
         std_ = [std(tseries[:,i]) for i in axes(tseries,2)]
     end
     tseries = StatsBase.standardize(ZScoreTransform, tseries, dims=1)
