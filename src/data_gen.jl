@@ -232,7 +232,7 @@ function ns_3d_benchmark(System::String, ; p_change=[linear, linear, linear], nu
         μₑₙ₀ = [ns_model.params[i](tmax) for i in axes(ns_model.params,1)]
         μₛ = [μ₀, μₑₙ₀]
         ts = [t₀,tmax-transient_T*ΔT]
-        snap_series = Vector{AbstractMatrix}
+        snap_series = Vector{AbstractMatrix}()
         for (i,μ) in enumerate(μₛ)
             if occursin("Lorenz", System)
                 ds = lorenz(p=μ)
