@@ -203,7 +203,7 @@ Returns
 -------
 time series : Time series of the specified system (AbstractMatrix)
 """
-function ns_3d_benchmark(System::String, ; p_change=[linear, linear, linear], num_T=15000, ΔT=0.01, transient_T=2000, plot_title="", PLOT=true, save_dir="", SAVE=true, process_noise_level=0.0,u0=nothing, eval=false, eval_run=0)
+function ns_3d_benchmark(System::String, ; p_change=[linear, linear, linear], num_T=15000, ΔT=0.01, transient_T=2000, plot_title="", PLOT=true, save_dir="", SAVE=true, process_noise_level=0.0,u0=nothing, snapshots=false, eval=false, eval_run=0)
     valid_systems = ["ExplodingLorenz", "ShiftingLorenz", "ShrinkingLorenz", "PaperLorenzBigChange", "PaperLorenzSmallChange"]
     @assert System in valid_systems "$System is not a valid System: $valid_systems"
 
@@ -216,6 +216,7 @@ function ns_3d_benchmark(System::String, ; p_change=[linear, linear, linear], nu
     end
     u0 = u0 === nothing ? [0.5,0.5,0.5] : u0
     std_ = ones(3)
+    ns_model = ns_lorenz_systems(System, p_change, tmax, zeros(3))
     for run in 1:nrun
         process_noise = run == 1 ? zeros(3) : process_noise_level.*std_
 
@@ -226,6 +227,21 @@ function ns_3d_benchmark(System::String, ; p_change=[linear, linear, linear], nu
     end
     tseries = StatsBase.standardize(ZScoreTransform, tseries, dims=1)
 
+    if snapshots
+        μ₀ = [ns_model.params[i](t₀) for i in axes(ns_model.params,1)]
+        μₑₙ₀ = [ns_model.params[i](tmax) for i in axes(ns_model.params,1)]
+        μₛ = [μ₀, μₑₙ₀]
+        ts = [t₀,tmax-transient_T*ΔT]
+        for (i,μ) in enumerate(μₛ)
+            if occursin("Lorenz", System)
+                ds = lorenz(p=μ)
+            else
+                throw("not implemented")
+            end
+            generate_trajectories(ds, tmax, transient_T, Δt=ΔT, PLOT=true, t₀=t₀, plot_title="$System snapshot at $(ts[i])",save_name="snapshot_$i")
+        end
+    end
+        
     if SAVE
         dir_path = isempty(save_dir) ? "data/benchmarks/" : save_dir
         mkpath(dir_path)

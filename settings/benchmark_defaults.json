@@ -11,5 +11,6 @@
     "num_trials" : 50,
     "MARKERS" : false,
     "p_change" : ["linear", "linear", "linear"],
-    "lorenz_trial_sys" : "ExplodingLorenz"
+    "lorenz_trial_sys" : "ExplodingLorenz",
+    "snapshots" : true
 }

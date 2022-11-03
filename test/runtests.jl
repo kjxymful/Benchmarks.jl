@@ -2,8 +2,7 @@ using Benchmarks
 using Test
 
 @testset "Benchmarks.jl" begin
-    @testset "standard benchmarks" begin
-        tmp = mktempdir(prefix="test")
-        
+    @testset "ns 3d" begin
+       
     end
 end

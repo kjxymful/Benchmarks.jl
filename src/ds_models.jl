@@ -99,8 +99,12 @@ end
     du[3] = u[1] * u[2] - β * u[3] + ϵ(process_noise[3])
 end
 
-function lorenz(; u0=[0.5,0.5,0.5], ρ=28.0, σ=10.0, β=8/3, process_noise=zeros(3))
-    p = [σ, ρ, β]
+function lorenz(; u0=[0.5,0.5,0.5], ρ=28.0, σ=10.0, β=8/3, process_noise=zeros(3), p=[])
+    if isempty(p)
+        p = [σ, ρ, β]
+    else
+        p=p
+    end
     return ds_sytem((du,u,p,t)->loop_lorenz!(du,u,p,t,process_noise=process_noise), p, u0, "lorenz")
 end
 

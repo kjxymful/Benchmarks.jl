@@ -20,6 +20,7 @@ function generate_benchmarks(args::Dict{String, Any})
     MARKERS = args["MARKERS"]::Bool
     p_change = args["p_change"]::Vector{String}
     lorenz_sys = args["lorenz_trial_sys"]::String
+    snapshots = args["snapshots"]
 
     if !any(x->benchmark_system in x, [valid_ns_systems,valid_trial_systems, valid_std_systems,valid_regimes])
         throw("$benchmark_system is not a valid system")
@@ -43,7 +44,7 @@ function generate_benchmarks(args::Dict{String, Any})
         end
         ns_3d_benchmark(benchmark_system, p_change=p_change_fun, num_T=num_T, ΔT=ΔT, transient_T=transient_T,
                         plot_title=plot_title,PLOT=PLOT, save_dir=save_dir,SAVE=SAVE, 
-                        process_noise_level=process_noise_level)
+                        process_noise_level=process_noise_level, snapshots=snapshots)
     elseif benchmark_system in valid_trial_systems
         trial_benchmark("split_lorenz", num_trials, seq_length=num_T, ΔT=ΔT, transient_T=transient_T, 
                         plot_title=plot_title, PLOT=PLOT, save_dir=save_dir,SAVE=SAVE,
@@ -128,6 +129,11 @@ function parse_commandline()
         help = "the lorenz system used to split"
         arg_type = String
         default = defaults["lorenz_trial_sys"] |> String
+
+        "--snapshots"
+        help = "whether to plot snapshots"
+        arg_type = Bool
+        default = defaults["snapshots"] |> Bool
     end
     return parse_args(settings)
 end
