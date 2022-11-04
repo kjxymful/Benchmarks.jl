@@ -242,9 +242,9 @@ function ns_3d_benchmark(System::String, ; p_change=[linear, linear, linear], nu
             push!(snap_series ,generate_trajectories(ds, tmax, transient_T, Δt=ΔT, PLOT=true, t₀=t₀, plot_title="$System snapshot at $(ts[i])",save_name="snapshot$System _$i"))
         end
         for (i,series) in enumerate(snap_series)
-            series = StatsBase.standardize(ZScoreTransform, series, dims=1)
+            std_series = StatsBase.standardize(ZScoreTransform, series, dims=1)
             mkpath("data/snapshots/")
-            npzwrite("data/snapshots/snaps_$(System)_$i.npy")
+            npzwrite("data/snapshots/snaps_$(System)_$i.npy",std_series)
         end
     end
         
