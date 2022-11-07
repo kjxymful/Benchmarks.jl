@@ -3,7 +3,7 @@ using ArgParse
 
 function generate_benchmarks(args::Dict{String, Any})
     valid_std_systems = ["standard_bursting", "standard_lorenz", "bursting_limit_cycle", "lorenz_limit_cycle"]
-    valid_ns_systems = ["ExplodingLorenz", "ShiftingLorenz", "ShrinkingLorenz", "PaperLorenzBigChange", "PaperLorenzSmallChange"]
+    valid_ns_systems = ["RampUpBN","SuddenBurstBN","ExplodingLorenz", "ShiftingLorenz", "ShrinkingLorenz", "PaperLorenzBigChange", "PaperLorenzSmallChange"]
     valid_trial_systems = ["trial_lorenz", "split_lorenz"]
     valid_regimes = ["bursting_neuron_regimes"]
 
@@ -18,7 +18,7 @@ function generate_benchmarks(args::Dict{String, Any})
     save_dir = args["save_dir"]::String
     num_trials = args["num_trials"]::Int
     MARKERS = args["MARKERS"]::Bool
-    p_change = args["p_change"]::Vector{String}
+    p_change = args["p_change"]::String
     lorenz_sys = args["lorenz_trial_sys"]::String
     snapshots = args["snapshots"]
 
@@ -36,12 +36,9 @@ function generate_benchmarks(args::Dict{String, Any})
                                 process_noise_level=process_noise_level)
     elseif benchmark_system in valid_ns_systems
         
-        p_change_fun = Vector{Function}()
-        for p_f in p_change
-            p_sym = Symbol(p_f)
-            p_fun = @eval $p_sym
-            push!(p_change_fun, p_fun)
-        end
+
+        p_sym = Symbol(p_change)
+        p_change_fun = @eval $p_sym
         ns_3d_benchmark(benchmark_system, p_change=p_change_fun, num_T=num_T, ΔT=ΔT, transient_T=transient_T,
                         plot_title=plot_title,PLOT=PLOT, save_dir=save_dir,SAVE=SAVE, 
                         process_noise_level=process_noise_level, snapshots=snapshots)
@@ -122,8 +119,8 @@ function parse_commandline()
 
         "--p_change"
         help = "Type of change for ns parameters"
-        arg_type = Vector{String}
-        default = defaults["p_change"] |>Vector{String}
+        arg_type = String
+        default = defaults["p_change"] |>String
 
         "--lorenz_trial_sys"
         help = "the lorenz system used to split"

@@ -5,7 +5,7 @@ function trial_ns_lorenz(num_trials::Int, trial_length::Int, ΔT::AbstractFloat,
     ρ_diff = (μ_end - μ_start)/num_trials
     ρs = μ_start:ρ_diff:μ_end
 
-    tmax = (trial_length+transient_T)*ΔT
+    tmax = trial_length*ΔT
     u0 = [-10.0,20.0,-15.0]
     trial_lorenz = Vector{AbstractMatrix}()
     for ρ in ρs
@@ -28,13 +28,13 @@ end
 
 function split_lorenz_trials(System::String, num_trials::Int, seq_length::Int, transient_T::Int, ΔT::AbstractFloat; process_noise_level=0.0)
     num_T = num_trials*seq_length
-    tmax = (num_T + transient_T) * ΔT
+    tmax = num_T * ΔT
 
     nrun = process_noise_level == 0 ? 1 : 2
     std_ = ones(3)
     for run in 1:nrun
         process_noise = run == 1 ? zeros(3) : process_noise_level.*std_
-        ns_model = ns_lorenz_systems(System, [linear,linear,linear], tmax, process_noise)
+        ns_model = ns_benchmark_systems(System, [linear,linear,linear], tmax, process_noise)
 
         tseries = generate_trajectories(ns_model, tmax, transient_T, Δt=ΔT, PLOT=false)
         std_ = [std(tseries[:,i]) for i in axes(tseries,2)]

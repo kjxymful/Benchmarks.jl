@@ -31,7 +31,7 @@ function test_ns3d_stability(args::Dict{String,Any})
         ns_3d_benchmark(benchmark_system, p_change=p_change_fun, num_T=num_T, ΔT=ΔT, transient_T=transient_T,
             plot_title=plot_title, PLOT=PLOT, save_dir=save_dir, SAVE=SAVE,
             process_noise_level=process_noise_level, u0=u₀,eval=true, eval_run=i)
-        u₀ = rand(-50f0:50f0,3)
+        u₀.+= randn(3)
     end
 end
 

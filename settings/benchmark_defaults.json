@@ -1,16 +1,16 @@
 {
-    "name": "ExplodingLorenz",
-    "process_noise_level" : 0.01,
+    "name": "ShrinkingLorenz",
+    "process_noise_level" : 0.00,
     "num_T" : 15000,
     "delta_T" : 0.01,
-    "transient_T" : 2000,
+    "transient_T" : 100,
     "PLOT" : true,
     "plot_title" : "",
     "SAVE" : true,
     "save_dir" : "",
     "num_trials" : 50,
     "MARKERS" : false,
-    "p_change" : ["linear", "linear", "linear"],
+    "p_change" : "linear",
     "lorenz_trial_sys" : "ExplodingLorenz",
     "snapshots" : true
 }
