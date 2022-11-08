@@ -1,6 +1,19 @@
 using DifferentialEquations
 using DynamicalSystems
 
+function plot_param(params, time,model_name)
+    if occursin("Lorenz",model_name)
+        p = plot(time, params[1].(time)/params[1](0), label="σ₀=$(round(params[1](0),digits=1))", legend=:inside, ylabel="% of IC")
+        plot!(time, params[2].(time)/params[2](0), label="ρ₀=$(round(params[2](0),digits=1))")
+        plot!(time, params[3].(time)/params[3](0), label="β₀=$(round(params[3](0),digits=1))")
+    elseif occursin("BN",model_name)
+        p = plot(time, params[1].(time)/params[1](0), label="gₙₘ₀ₐ₀=$(round(params[1](0),digits=1))",legend=:inside, ylabel="% of IC")
+    else
+        throw("No parameter specifices for this model implemented")
+    end
+    return p
+end
+    
 
 """
     generate_trajectories(ds,tmax, transient_T;Δt=0.01, t₀=0.0, PLOT=true)
@@ -18,28 +31,31 @@ save_name : as what to save the file
 
 *Plotting to Figures/*
 """
-function generate_trajectories(model::GeneralizedDynamicalSystem, tmax, transient_T::Int; Δt=0.01, t₀=0.0, STD=false, PLOT=true, plot_title="", eval=false, eval_run=0, save_name="", model_name="")
-    ts = trajectory(model, tmax; Δt=Δt, Ttr=transient_T, diffeq=(t₀=t₀,))
+function generate_trajectories(model::GeneralizedDynamicalSystem, tmax, transient_T::Int; Δt=0.01, t₀=0.0, STD=false, PLOT=true, plot_title="", eval=false, eval_run=0, save_name="", model_name="", pl_params=[])
+    ts = trajectory(model, tmax; Δt=Δt, Ttr=transient_T)
     u = Matrix(ts)
     u_std = StatsBase.standardize(ZScoreTransform, u, dims=1)
 
-    t = t₀:Δt:tmax
+    t = (t₀+transient_T):Δt:(tmax+transient_T)
     if PLOT
         if occursin("Paper", model_name)
             uS0 = u_std[findall(x -> x <= 0, t), :]
             uB0 = u_std[findall(x -> x > 0, t), :]
             p = plot3d(uS0[:, 1], uS0[:, 2], uS0[:, 3],
                 grid=true,
-                xlabel="x", ylabel="y", zlabel="z",
                 lc=:red, label="t\$\\leq\$0", linealpha=1, title=plot_title)
             plot3d!(p, uB0[:, 1], uB0[:, 2], uB0[:, 3], lc=:black, label="t>0", linealpha=0.8)
         else
             p = plot3d(u_std[1:end, 1], u_std[1:end, 2], u_std[1:end, 3],
                 grid=true,
-                xlabel="x", ylabel="y", zlabel="z",
                 lc=cgrad(:viridis), line_z=t[1:end] * 100,
                 colorbar_title=" \n \ntime",
                 right_margin=1.5Plots.mm, title=plot_title)
+        end
+        if !isempty(pl_params)
+            p_par = plot_param(pl_params, t, model_name)
+            l = grid(2,1, heights=[0.8,0.2])
+            p = plot(p, p_par, layout=l, plot_title=plot_title)
         end
         if eval
             mkpath("Figures/eval_$(model_name)")
@@ -78,7 +94,7 @@ end
 """
 uses DifferentialEquations
 """
-function generate_trajectories(model::AbstractDynamicalSystem, tmax::AbstractFloat, skip_steps::Int; Δt=0.01, t₀=0.0, PLOT=true, plot_title="", eval=false, eval_run=0, save_name="")
+function generate_trajectories(model::AbstractDynamicalSystem, tmax::AbstractFloat, skip_steps::Int; Δt=0.01, t₀=0.0, PLOT=true, plot_title="", eval=false, eval_run=0, save_name="", pl_params=[],model_name="")
     tspan = (t₀, tmax)
 
     prob = ODEProblem(model.sys, model.u0, tspan, model.params)
@@ -93,11 +109,12 @@ function generate_trajectories(model::AbstractDynamicalSystem, tmax::AbstractFlo
         if occursin("Paper", model.name)
             uS0 = u_std[findall(x -> x <= 0, t), :]
             uB0 = u_std[findall(x -> x > 0, t), :]
-            p = plot3d(uS0[:, 1], uS0[:, 2], uS0[:, 3],
+            p = plot3d(uB0[:, 1], uB0[:, 2], uB0[:, 3], lc=:black, label="t>0")
+            plot3d!(p,uS0[:, 1], uS0[:, 2], uS0[:, 3],
                 grid=true,
                 xlabel="x", ylabel="y", zlabel="z",
                 lc=:red, label="t\$\\leq\$0", linealpha=1, title=plot_title)
-            plot3d!(p, uB0[:, 1], uB0[:, 2], uB0[:, 3], lc=:black, label="t>0", linealpha=0.8)
+            
         else
             p = plot3d(u_std[1:end, 1], u_std[1:end, 2], u_std[1:end, 3],
                 grid=true,
@@ -105,6 +122,11 @@ function generate_trajectories(model::AbstractDynamicalSystem, tmax::AbstractFlo
                 lc=cgrad(:viridis), line_z=t[1:end] * 100,
                 colorbar_title=" \n \ntime",
                 right_margin=1.5Plots.mm, title=plot_title)
+        end
+        if !isempty(pl_params)
+            p_par = plot_param(pl_params, t, model_name)
+            l = grid(2,1, heights=[0.8,0.2])
+            p = plot(p, p_par, layout=l, plot_title=plot_title)
         end
         if eval
             mkpath("Figures/eval_$(model.name)")
@@ -117,3 +139,5 @@ function generate_trajectories(model::AbstractDynamicalSystem, tmax::AbstractFlo
     end
     return u
 end
+
+

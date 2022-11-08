@@ -62,10 +62,10 @@ function std_3d_benchmark(System::String; num_T=15000, ΔT=0.01, transient_T=200
             ds = lorenz(process_noise=process_noise)
         elseif System == "bursting_limit_cycle"
             ds = bursting_neuron(u0=[-60.0, 0.0386, 0.0231], gₙₘ₀ₐ=10.0, process_noise=process_noise)
-            μ = 10.1
+            μ = 10.0
         elseif System == "lorenz_limit_cycle"
-            μ = 24.0
-            ds = lorenz(process_noise=process_noise)
+            μ = 23.0
+            ds = lorenz(ρ=23.0, process_noise=process_noise)
         end
         tseries = generate_trajectories(ds, tmax, transient_T, Δt=ΔT, PLOT=false,model_name=System)
         std_ = [std(tseries[:,i]) for i in axes(tseries,2)]
@@ -82,7 +82,7 @@ function std_3d_benchmark(System::String; num_T=15000, ΔT=0.01, transient_T=200
             colorbar_title=" \n \ntime",
             right_margin=1.5Plots.mm,
             marker=marker)
-        mkpath("Figures/")
+        mkpath("Figures/data/")
         savefig(p, "Figures/data/$System.png")
     end
 
@@ -212,41 +212,48 @@ Returns
 -------
 time series : Time series of the specified system (AbstractMatrix)
 """
-function ns_3d_benchmark(System::String, ; p_change=linear, num_T=15000, ΔT=0.01, transient_T=100, plot_title="", PLOT=true, save_dir="", SAVE=true, process_noise_level=0.0,u0=nothing, snapshots=false, eval=false, eval_run=0)
+function ns_3d_benchmark(System::String, ; p_change=linear, num_T=15000, ΔT=0.01, transient_T=100, plot_title="", PLOT=true, save_dir="", SAVE=true, process_noise_level=0.0,u0=nothing, snapshots=false, eval=false, eval_run=0, plot_params=false)
     valid_systems = ["RampUpBN", "SuddenBurstBN", "ExplodingLorenz", "ShiftingLorenz", "ShrinkingLorenz", "PaperLorenzBigChange", "PaperLorenzSmallChange"]
     @assert System in valid_systems "$System is not a valid System: $valid_systems"
 
+    u0 = u0 === nothing ? [0.5,0.5,0.5] : u0
     t₀ = 0.0
     tmax = num_T* ΔT
+    ns_model = ns_benchmark_systems(System, p_change, tmax, zeros(3), u0=u0, transient_T=transient_T,t₀=t₀)
     if occursin("Paper", System)
         t₀ = -600.0 - transient_T * ΔT
         tmax = 200.0
-    end
-    u0 = u0 === nothing ? [0.5,0.5,0.5] : u0
-    ns_model = ns_benchmark_systems(System, p_change, tmax, zeros(3), u0=u0, transient_T=transient_T)
+        ns_model = ns_systems_bench(System, p_change, tmax, zeros(3), u0=u0, transient_T=transient_T)
+    end    
+    
 
     # do 2 runs to get the values for the process noise
-    nrun = process_noise_level == 0
+    nrun = process_noise_level == 0 ? 1 : 2
     std_ = ones(3)
     tseries = zeros(num_T,3)
     params = Vector()
     for run in 1:nrun
         process_noise = run == 1 ? zeros(3) : process_noise_level.*std_
 
-        ns_model, params = ns_benchmark_systems(System, p_change, tmax, process_noise, u0=u0)
+        if occursin("Paper", System)
+            ns_model = ns_systems_bench(System, p_change, tmax, process_noise, u0=u0, transient_T=transient_T)
+            params = ns_model.params
+        else
+            ns_model, params = ns_benchmark_systems(System, p_change, tmax, process_noise, u0=u0,t₀=t₀)
+        end
 
-        tseries = generate_trajectories(ns_model, tmax, transient_T, Δt=ΔT, model_name=System, PLOT=PLOT, t₀=t₀, plot_title=plot_title, eval=eval, eval_run=eval_run)
+        pl_params = plot_params ? params : []
+        tseries = generate_trajectories(ns_model, tmax, transient_T, Δt=ΔT, model_name=System, PLOT=PLOT, t₀=t₀, plot_title=plot_title, eval=eval, eval_run=eval_run, pl_params=pl_params)
         std_ = [std(tseries[:,i]) for i in axes(tseries,2)]
     end
     tseries = StatsBase.standardize(ZScoreTransform, tseries, dims=1)
 
     if snapshots
         μ₀ = [params[i](t₀) for i in axes(params,1)]
-        μₑₙ₀ = [params[i](tmax-transient_T*ΔT) for i in axes(params,1)]
+        μₑₙ₀ = [params[i](tmax+transient_T*ΔT) for i in axes(params,1)]
         μₛ = [μ₀, μₑₙ₀]
         snap_series = Vector{AbstractMatrix}()
         for (i,μ) in enumerate(μₛ)
-            @show μ
             if occursin("Lorenz", System)
                 ds = lorenz(p=μ)
             elseif occursin("BN", System)
@@ -256,8 +263,8 @@ function ns_3d_benchmark(System::String, ; p_change=linear, num_T=15000, ΔT=0.0
             end
             push!(snap_series ,generate_trajectories(ds, tmax, transient_T, Δt=ΔT, PLOT=false, t₀=t₀, model_name=System))
         end
-        comp_plots = plot3d(snap_series[1][:,1],snap_series[1][:,2],snap_series[1][:,3], grid=true, xlabel="x", ylabel="y", zlabel="z", lc=:blue, title="Snapshot comparisons", label="Snapshot at t=0")
-        plot3d!(snap_series[2][:,1],snap_series[2][:,2],snap_series[2][:,3], grid=true, lc=:orange, label="Snapshot at t=T")
+        comp_plots = plot3d(snap_series[2][:,1],snap_series[2][:,2],snap_series[2][:,3], grid=true, lc=:orange, label="Snapshot at t=T")
+        plot3d!(snap_series[1][:,1],snap_series[1][:,2],snap_series[1][:,3], grid=true, xlabel="x", ylabel="y", zlabel="z", lc=:blue, title="Snapshot comparisons", label="Snapshot at t=0", linealpha=0.8)
         mkpath("Figures/snapshots/")
         savefig(comp_plots, "Figures/snapshots/Snapshots_$System")
         

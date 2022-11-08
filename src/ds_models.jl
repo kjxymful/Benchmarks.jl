@@ -47,10 +47,10 @@ function bursting_neuron(; u0=[-24.4694, 0.0386, 0.0231],
     Vₕₘ=-15,
     kₘ=5,
     τₕ=200,
-    gₙₘ₀ₐ=10.2,process_noise=zeros(3))
+    gₙₘ₀ₐ=10.2,process_noise=zeros(3),t₀=0.0)
     p = [I, Cₘ, gₗ, Eₗ, gₙₐ, Eₙₐ, Vₕₙₐ, kₙₐ, gₖ, Eₖ, Vₕₖ, kₖ, τₙ, gₘ, Vₕₘ, kₘ, τₕ, gₙₘ₀ₐ]
     jac = (du,u,par,t) -> loop_burstn!(du,u,par,t,process_noise=process_noise)
-    ds = ContinuousDynamicalSystem(jac, u0, p)
+    ds = ContinuousDynamicalSystem(jac, u0, p,t0=t₀)
     return ds
 end
 
@@ -83,14 +83,14 @@ function bursting_neuron(method_holder::String; u0=[-24.4694, 0.0386, 0.0231],
 end
 
 
-function lorenz(;u0=[0.5,0.5,0.5], ρ=28.0, σ=10.0, β=8/3, process_noise=zeros(3), p=[])
+function lorenz(;u0=[0.5,0.5,0.5], ρ=28.0, σ=10.0, β=8/3, process_noise=zeros(3), p=[],t₀=0.0)
     if isempty(p)
         p = [σ, ρ, β]
     else
         p=p
     end
     jac = (du,u,par,t) -> loop_lorenz!(du,u,par,t,process_noise=process_noise)
-    return ContinuousDynamicalSystem(jac, u0,p)
+    return ContinuousDynamicalSystem(jac, u0,p,t0=t₀)
 end
 
 
