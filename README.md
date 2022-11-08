@@ -47,12 +47,25 @@ If you want to create your own system, use the Dynamical Systems in either src/d
 - bursting_neuron_regimes
 
 ### Non-Stationary Benchmarks
-- ShrinkingLorenz : Starts with the chaotic attractor and shrinks plus shifts it a bit; ρ=28->23, σ=10->5, β=8/3->0.5
+#### Lorenz
+- ShrinkingLorenz : Starts with the chaotic attractor and shrinks plus shifts it a bit; ρ=28->23, σ=10->5, β=8/3->0.5 (transient Time should not be bigger than 50, as it leads to weird regimes)
+
 - PaperLorenzBigChange : The ns system used in Patel et al. 2022 with a quick parameter change
+
 - PaperLorenzSmallChange : The ns system used in Patel et al. 2022 with a slow parameter change
+
 - ExplodingLorenz : Starts with a limit cycle and ends in the 
 well known chaotic attractor; ρ=22->28 (not a very stable system, i.e. sensitive to initial conditions, makes it harder to train on)
+
 - ShiftingLorenz : Starts with the chaotic attractor and shifts it "forward"; ρ=28->22 (limit cycle does not appear in time series, -> not great for snapshot comparison)
+
+
+#### Bursting Neuron
+The timescale is much longer than for the Lorenz, and thus needs a lot more time points
+
+- RampUpBN : Starts with the a cycle, and adds bursting loops; g=2->4
+
+- SuddenBurstBN : Not implemented
 
 ### Trial Benchmark Systems
 - trial_lorenz : a lorenz with parameter shifting from 22->28 across trials
