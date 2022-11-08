@@ -239,7 +239,7 @@ function ns_3d_benchmark(System::String, ; p_change=linear, num_T=15000, ΔT=0.0
             ns_model = ns_systems_bench(System, p_change, tmax, process_noise, u0=u0, transient_T=transient_T)
             params = ns_model.params
         else
-            ns_model, params = ns_benchmark_systems(System, p_change, tmax, process_noise, u0=u0,t₀=t₀)
+            ns_model, params = ns_benchmark_systems(System, p_change, tmax, process_noise, u0=u0,t₀=t₀, transient_T=transient_T)
         end
 
         pl_params = plot_params ? params : []
@@ -249,7 +249,8 @@ function ns_3d_benchmark(System::String, ; p_change=linear, num_T=15000, ΔT=0.0
     tseries = StatsBase.standardize(ZScoreTransform, tseries, dims=1)
 
     if snapshots
-        μ₀ = [params[i](t₀) for i in axes(params,1)]
+        μ₀ = [params[i](t₀+transient_T) for i in axes(params,1)]
+        @show params[2](0), params[2](transient_T), params[2](tmax), params[2](tmax+transient_T)
         μₑₙ₀ = [params[i](tmax+transient_T*ΔT) for i in axes(params,1)]
         μₛ = [μ₀, μₑₙ₀]
         snap_series = Vector{AbstractMatrix}()

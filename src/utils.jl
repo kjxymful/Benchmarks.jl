@@ -1,13 +1,14 @@
 using DifferentialEquations
 using DynamicalSystems
 
-function plot_param(params, time,model_name)
+function plot_param(params, time, Ttr,model_name)
+    time1 = time .+ Ttr
     if occursin("Lorenz",model_name)
-        p = plot(time, params[1].(time)/params[1](0), label="σ₀=$(round(params[1](0),digits=1))", legend=:inside, ylabel="% of IC")
-        plot!(time, params[2].(time)/params[2](0), label="ρ₀=$(round(params[2](0),digits=1))")
-        plot!(time, params[3].(time)/params[3](0), label="β₀=$(round(params[3](0),digits=1))")
+        p = plot(time, params[1].(time1)/params[1](time1[1]), label="σ₀=$(round(params[1](time1[1]),digits=1))", legend=:inside, ylabel="% of IC")
+        plot!(time, params[2].(time1)/params[2](time1[1]), label="ρ₀=$(round(params[2](time1[1]),digits=1))")
+        plot!(time, params[3].(time1)/params[3](time1[1]), label="β₀=$(round(params[3](time1[1]),digits=1))")
     elseif occursin("BN",model_name)
-        p = plot(time, params[1].(time)/params[1](0), label="gₙₘ₀ₐ₀=$(round(params[1](0),digits=1))",legend=:inside, ylabel="% of IC")
+        p = plot(time, params[1].(time1)/params[1](time1[1]), label="gₙₘ₀ₐ₀=$(round(params[1](time1[1]),digits=1))",legend=:inside, ylabel="% of IC")
     else
         throw("No parameter specifices for this model implemented")
     end
@@ -36,7 +37,7 @@ function generate_trajectories(model::GeneralizedDynamicalSystem, tmax, transien
     u = Matrix(ts)
     u_std = StatsBase.standardize(ZScoreTransform, u, dims=1)
 
-    t = (t₀+transient_T):Δt:(tmax+transient_T)
+    t = t₀:Δt:tmax
     if PLOT
         if occursin("Paper", model_name)
             uS0 = u_std[findall(x -> x <= 0, t), :]
@@ -53,7 +54,7 @@ function generate_trajectories(model::GeneralizedDynamicalSystem, tmax, transien
                 right_margin=1.5Plots.mm, title=plot_title)
         end
         if !isempty(pl_params)
-            p_par = plot_param(pl_params, t, model_name)
+            p_par = plot_param(pl_params, t, transient_T, model_name)
             l = grid(2,1, heights=[0.8,0.2])
             p = plot(p, p_par, layout=l, plot_title=plot_title)
         end
@@ -124,7 +125,7 @@ function generate_trajectories(model::AbstractDynamicalSystem, tmax::AbstractFlo
                 right_margin=1.5Plots.mm, title=plot_title)
         end
         if !isempty(pl_params)
-            p_par = plot_param(pl_params, t, model_name)
+            p_par = plot_param(pl_params, t, 0, model_name)
             l = grid(2,1, heights=[0.8,0.2])
             p = plot(p, p_par, layout=l, plot_title=plot_title)
         end
