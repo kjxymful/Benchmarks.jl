@@ -34,9 +34,9 @@ function split_lorenz_trials(System::String, num_trials::Int, seq_length::Int, t
     std_ = ones(3)
     for run in 1:nrun
         process_noise = run == 1 ? zeros(3) : process_noise_level.*std_
-        ns_model = ns_benchmark_systems(System, [linear,linear,linear], tmax, process_noise)
+        ns_model,params = ns_benchmark_systems(System, linear, tmax, process_noise)
 
-        tseries = generate_trajectories(ns_model, tmax, transient_T, Δt=ΔT, PLOT=false)
+        tseries = generate_trajectories(ns_model, tmax, transient_T, Δt=ΔT, model_name=System, PLOT=false)
         std_ = [std(tseries[:,i]) for i in axes(tseries,2)]
     end
     tseries = StatsBase.standardize(ZScoreTransform, tseries, dims=1)
