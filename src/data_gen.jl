@@ -250,7 +250,6 @@ function ns_3d_benchmark(System::String, ; p_change=linear, num_T=15000, ΔT=0.0
 
     if snapshots
         μ₀ = [params[i](t₀+transient_T) for i in axes(params,1)]
-        @show params[2](0), params[2](transient_T), params[2](tmax), params[2](tmax+transient_T)
         μₑₙ₀ = [params[i](tmax+transient_T*ΔT) for i in axes(params,1)]
         μₛ = [μ₀, μₑₙ₀]
         snap_series = Vector{AbstractMatrix}()
