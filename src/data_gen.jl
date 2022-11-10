@@ -62,7 +62,7 @@ function std_3d_benchmark(System::String; num_T=15000, ΔT=0.01, transient_T=200
             ds = lorenz(process_noise=process_noise)
         elseif System == "bursting_limit_cycle"
             ds = bursting_neuron(u0=[-60.0, 0.0386, 0.0231], gₙₘ₀ₐ=10.0, process_noise=process_noise)
-            μ = 10.0
+            μ = 10.1
         elseif System == "lorenz_limit_cycle"
             μ = 23.0
             ds = lorenz(ρ=23.0, process_noise=process_noise)
