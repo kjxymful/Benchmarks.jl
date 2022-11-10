@@ -9,7 +9,7 @@
     "plot_title": "",
     "snapshots": true,
     "plot_params": true,
-    "plot_name": "",
+    "exp_name": "",
     "MARKERS": false,
     "SAVE" : true,
     "save_dir" : "",

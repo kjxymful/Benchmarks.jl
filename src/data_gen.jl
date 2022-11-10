@@ -47,6 +47,7 @@ time series : Time series of the specified system (AbstractMatrix)
 function std_3d_benchmark(System::String; num_T=15000, ΔT=0.01, transient_T=2000, plot_title="", PLOT=true, save_dir="", SAVE=true, MARKER=false, process_noise_level=0.0,plot_name="")
     valid_systems = ["standard_bursting", "standard_lorenz", "bursting_limit_cycle", "lorenz_limit_cycle", "RampUpBN", "StopBurstBN"]
     @assert System in valid_systems "$System is not a valid System: $valid_systems"
+    exp_name = isempty(plot_name) ? String(System) : plot_name
 
     tmax = num_T*ΔT
 
@@ -83,14 +84,13 @@ function std_3d_benchmark(System::String; num_T=15000, ΔT=0.01, transient_T=200
             right_margin=1.5Plots.mm,
             marker=marker)
         mkpath("Figures/data/")
-        fig_name = isempty(plot_name) ? String(System) : plot_name
-        savefig(p, "Figures/data/$fig_name.png")
+        savefig(p, "Figures/data/$exp_name.png")
     end
 
     if SAVE
         dir_path = isempty(save_dir) ? "data/benchmarks/" : save_dir
         mkpath(dir_path)
-        npzwrite("data/benchmarks/$System.npy", tseries)
+        npzwrite("data/benchmarks/$exp_name.npy", tseries)
     end
     return tseries
 end
@@ -124,6 +124,7 @@ time series : Time series of the specified system (AbstractMatrix)
 """
 function bursting_neuron_regimes(; num_T=150000, ΔT=0.01, transient_T=2000, PLOT=true, save_dir="", SAVE=true, process_noise_level=0.0,plot_name="")
     μₛ = [3.0, 5.0, 7.0, 9.0, 10.0, 10.2]
+    exp_name = isempty(plot_name) ? "bursting_neuron_regimes" : p
 
     nrun = process_noise_level == 0 ? 1 : 2
     tseries = Vector{AbstractMatrix}()
@@ -143,7 +144,7 @@ function bursting_neuron_regimes(; num_T=150000, ΔT=0.01, transient_T=2000, PLO
         if SAVE
             dir_path = isempty(save_dir) ? "data/benchmarks/" : save_dir
             mkpath(dir_path)
-            npzwrite("data/benchmarks/bursting_neuron_$(μ).npy", ts)
+            npzwrite("data/benchmarks/$exp_name_$(μ).npy", ts)
         end
     end
 
@@ -155,8 +156,7 @@ function bursting_neuron_regimes(; num_T=150000, ΔT=0.01, transient_T=2000, PLO
             plot_title="bursting neuron regimes", plot_titlevspan=0.08,
             size=(500, 500))
         mkpath("Figures/data/")
-        fig_name = isempty(plot_name) ? "bursting_neuron_regimes" : plot_name
-        savefig(g, "Figures/data/$fig_name.png")
+        savefig(g, "Figures/data/$exp_name.png")
     end
 end
 
@@ -217,7 +217,7 @@ time series : Time series of the specified system (AbstractMatrix)
 function ns_3d_benchmark(System::String, ; p_change=linear, num_T=15000, ΔT=0.01, transient_T=100, plot_title="", PLOT=true, save_dir="", SAVE=true, process_noise_level=0.0,u0=nothing, snapshots=false, eval=false, eval_run=0, plot_params=false,plot_name="")
     valid_systems = ["RampUpBN", "StopBurstBN", "ExplodingLorenz", "ShiftingLorenz", "ShrinkingLorenz", "PaperLorenzBigChange", "PaperLorenzSmallChange"]
     @assert System in valid_systems "$System is not a valid System: $valid_systems"
-    fig_name = isempty(plot_name) ? String(System) : plot_name
+    exp_name = isempty(plot_name) ? String(System) : plot_name
 
     u0 = u0 === nothing ? [0.4, 0.4, 0.8] : u0
     t₀ = 0.0
@@ -246,7 +246,7 @@ function ns_3d_benchmark(System::String, ; p_change=linear, num_T=15000, ΔT=0.0
         end
 
         pl_params = plot_params ? params : []
-        tseries = generate_trajectories(ns_model, tmax, transient_T, Δt=ΔT, model_name=System, PLOT=PLOT, t₀=t₀, plot_title=plot_title, eval=eval, eval_run=eval_run, pl_params=pl_params, save_name=fig_name)
+        tseries = generate_trajectories(ns_model, tmax, transient_T, Δt=ΔT, model_name=System, PLOT=PLOT, t₀=t₀, plot_title=plot_title, eval=eval, eval_run=eval_run, pl_params=pl_params, save_name=exp_name)
         std_ = [std(tseries[:,i]) for i in axes(tseries,2)]
     end
     tseries = StatsBase.standardize(ZScoreTransform, tseries, dims=1)
@@ -269,19 +269,19 @@ function ns_3d_benchmark(System::String, ; p_change=linear, num_T=15000, ΔT=0.0
         comp_plots = plot3d(snap_series[2][:,1],snap_series[2][:,2],snap_series[2][:,3], grid=true, lc=:orange, label="Snapshot at t=T")
         plot3d!(snap_series[1][:,1],snap_series[1][:,2],snap_series[1][:,3], grid=true, xlabel="x", ylabel="y", zlabel="z", lc=:blue, title="Snapshot comparisons", label="Snapshot at t=0", linealpha=0.8)
         mkpath("Figures/snapshots/")
-        savefig(comp_plots, "Figures/snapshots/Snapshots_$fig_name.png")
+        savefig(comp_plots, "Figures/snapshots/Snapshots_$exp_name.png")
         
         for (i,series) in enumerate(snap_series)
             std_series = StatsBase.standardize(ZScoreTransform, series, dims=1)
             mkpath("data/snapshots/")
-            npzwrite("data/snapshots/snaps_$(System)_$i.npy",std_series)
+            npzwrite("data/snapshots/snaps_$(exp_name)_$i.npy",std_series)
         end
     end
         
     if SAVE
         dir_path = isempty(save_dir) ? "data/benchmarks/" : save_dir
         mkpath(dir_path)
-        npzwrite("data/benchmarks/$System.npy", tseries)
+        npzwrite("data/benchmarks/$exp_name.npy", tseries)
     end
     return tseries
 end

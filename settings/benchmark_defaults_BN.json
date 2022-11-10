@@ -9,7 +9,7 @@
     "plot_title": "",
     "snapshots": true,
     "plot_params": true,
-    "plot_name": "regimes_5",
+    "exp_name": "regimes_5",
     "MARKERS": false,
     "SAVE": true,
     "save_dir": "",

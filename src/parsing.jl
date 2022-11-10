@@ -22,7 +22,7 @@ function generate_benchmarks(args::Dict{String, Any})
     lorenz_sys = args["lorenz_trial_sys"]::String
     snapshots = args["snapshots"]
     plot_params = args["plot_params"]
-    plot_name = args["plot_name"]
+    plot_name = args["exp_name"]
 
     if !any(x->benchmark_system in x, [valid_ns_systems,valid_trial_systems, valid_std_systems,valid_regimes])
         throw("$benchmark_system is not a valid system")
@@ -140,10 +140,10 @@ function parse_commandline()
         arg_type = Bool
         default = defaults["plot_params"] |> Bool
 
-        "--plot_name"
+        "--exp_name"
         help = "name as which to save the plot"
         arg_type = String
-        default = defaults["plot_name"] |> String
+        default = defaults["exp_name"] |> String
     end
     return parse_args(settings)
 end
