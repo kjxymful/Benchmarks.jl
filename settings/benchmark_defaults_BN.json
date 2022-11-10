@@ -1,9 +1,9 @@
 {
-    "name": "ShrinkingLorenz",
+    "name": "StopBurstBN",
     "process_noise_level" : 0.00,
-    "num_T" : 15000,
-    "delta_T" : 0.01,
-    "transient_T" : 50,
+    "num_T" : 60000,
+    "delta_T" : 0.05,
+    "transient_T" : 300,
     "PLOT" : true,
     "plot_title" : "",
     "SAVE" : true,
