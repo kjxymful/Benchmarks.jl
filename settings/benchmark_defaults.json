@@ -1,17 +1,18 @@
 {
-    "name": "ShrinkingLorenz",
+    "name": "ShringkingLorenz",
     "process_noise_level" : 0.00,
     "num_T" : 15000,
     "delta_T" : 0.01,
     "transient_T" : 50,
+    "p_change": "linear",
     "PLOT" : true,
-    "plot_title" : "",
+    "plot_title": "",
+    "snapshots": true,
+    "plot_params": true,
+    "plot_name": "",
+    "MARKERS": false,
     "SAVE" : true,
     "save_dir" : "",
-    "num_trials" : 50,
-    "MARKERS" : false,
-    "p_change" : "linear",
-    "lorenz_trial_sys" : "ShiftingLorenz",
-    "snapshots" : true,
-    "plot_params" : true
+    "num_trials": 50,
+    "lorenz_trial_sys" : "ShiftingLorenz"
 }
