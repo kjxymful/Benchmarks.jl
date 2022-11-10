@@ -1,6 +1,6 @@
 {
     "name": "bursting_neuron_regimes",
-    "process_noise_level": 0.05,
+    "process_noise_level": 0.00,
     "num_T": 150000,
     "delta_T": 0.01,
     "transient_T": 500,
