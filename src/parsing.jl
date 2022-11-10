@@ -22,6 +22,7 @@ function generate_benchmarks(args::Dict{String, Any})
     lorenz_sys = args["lorenz_trial_sys"]::String
     snapshots = args["snapshots"]
     plot_params = args["plot_params"]
+    plot_name = args["plot_name"]
 
     if !any(x->benchmark_system in x, [valid_ns_systems,valid_trial_systems, valid_std_systems,valid_regimes])
         throw("$benchmark_system is not a valid system")
@@ -30,11 +31,11 @@ function generate_benchmarks(args::Dict{String, Any})
     if benchmark_system in valid_std_systems
         std_3d_benchmark(benchmark_system, num_T=num_T, ΔT=ΔT, transient_T=transient_T, 
                         plot_title=plot_title, PLOT=PLOT, save_dir=save_dir, SAVE=SAVE,MARKER=MARKERS,
-                        process_noise_level=process_noise_level)
+                        process_noise_level=process_noise_level,plot_name=plot_name)
     elseif benchmark_system in valid_regimes
         bursting_neuron_regimes(num_T=num_T, ΔT=ΔT, transient_T=transient_T,
                                 PLOT=PLOT, save_dir=save_dir, SAVE=SAVE,
-                                process_noise_level=process_noise_level)
+                                process_noise_level=process_noise_level,plot_name=plot_name)
     elseif benchmark_system in valid_ns_systems
         
 
@@ -42,7 +43,8 @@ function generate_benchmarks(args::Dict{String, Any})
         p_change_fun = @eval $p_sym
         ns_3d_benchmark(benchmark_system, p_change=p_change_fun, num_T=num_T, ΔT=ΔT, transient_T=transient_T,
                         plot_title=plot_title,PLOT=PLOT, save_dir=save_dir,SAVE=SAVE, 
-                        process_noise_level=process_noise_level, snapshots=snapshots,plot_params=plot_params)
+                        process_noise_level=process_noise_level, snapshots=snapshots,
+                        plot_params=plot_params, plot_name=plot_name)
     elseif benchmark_system in valid_trial_systems
         trial_benchmark("split_lorenz", num_trials, seq_length=num_T, ΔT=ΔT, transient_T=transient_T, 
                         plot_title=plot_title, PLOT=PLOT, save_dir=save_dir,SAVE=SAVE,
@@ -137,6 +139,11 @@ function parse_commandline()
         help = "whether to plot parameter change"
         arg_type = Bool
         default = defaults["plot_params"] |> Bool
+
+        "--plot_name"
+        help = "name as which to save the plot"
+        arg_type = String
+        default = defaults["plot_name"] |> String
     end
     return parse_args(settings)
 end

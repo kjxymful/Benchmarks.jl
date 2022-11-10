@@ -62,9 +62,9 @@ function generate_trajectories(model::GeneralizedDynamicalSystem, tmax, transien
             mkpath("Figures/eval_$(model_name)")
             savefig(p, "Figures/eval_$(model_name)/$eval_run.png")
         else
-            save_path = save_name == "" ? "Figures/data/$(model_name).png" : "Figures/" * save_name * ".png"
+            save_name = isempty(save_name) ? model_name : save_name
             mkpath("Figures/data/")
-            savefig(p, save_path)
+            savefig(p, "Figures/data/$save_name.png")
         end
     end
     if STD 
@@ -133,9 +133,9 @@ function generate_trajectories(model::AbstractDynamicalSystem, tmax::AbstractFlo
             mkpath("Figures/eval_$(model.name)")
             savefig(p, "Figures/eval_$(model.name)/$eval_run.png")
         else
-            save_path = save_name == "" ? "Figures/data/$(model.name).png" : "Figures/" * save_name * ".png"
+            save_name = isempty(save_name) ? String(model.name) : save_name
             mkpath("Figures/data/")
-            savefig(p, save_path)
+            savefig(p, "Figures/data/$save_name.png")
         end
     end
     return u
