@@ -25,7 +25,6 @@ Returns
 Initialized ns_systems for the lorenz ns benchmarks
 """
 function ns_benchmark_systems(sys::String, par_fun::Function, tmax::AbstractFloat, process_noise_level::Vector{Float64}; u0=[0.4,0.4,0.8], transient_T=0.0,t₀=0.0)
-    println("using DynamicalSystems")
     valid_models = ["RampUpBN", "StopBurstBN", "ExplodingLorenz", "ShrinkingLorenz", "ShiftingLorenz","PaperLorenzBigChange", "PaperLorenzSmallChange"]
     if !(sys in valid_models)
         throw("$sys is not a valid system:$valid_models")
@@ -102,7 +101,6 @@ end
 
 
 function ns_systems_bench(sys::String, par_fun::Function, tmax::AbstractFloat, process_noise_level::Vector{Float64}; u0=[0.4, 0.4, 0.8], transient_T=0.0,t₀=0.0)
-    println("using DifferentialEquations")
     valid_models = ["RampUpBN", "StopBurstBN", "ExplodingLorenz", "ShrinkingLorenz", "ShiftingLorenz","PaperLorenzBigChange", "PaperLorenzSmallChange"]
     if !(sys in valid_models)
         throw("$sys is not a valid system:$valid_models")
