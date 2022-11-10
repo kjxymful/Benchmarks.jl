@@ -45,7 +45,7 @@ time series : Time series of the specified system (AbstractMatrix)
 
 """
 function std_3d_benchmark(System::String; num_T=15000, ΔT=0.01, transient_T=2000, plot_title="", PLOT=true, save_dir="", SAVE=true, MARKER=false, process_noise_level=0.0)
-    valid_systems = ["standard_bursting", "standard_lorenz", "bursting_limit_cycle", "lorenz_limit_cycle", "RampUpBN", "SuddenBurstBN"]
+    valid_systems = ["standard_bursting", "standard_lorenz", "bursting_limit_cycle", "lorenz_limit_cycle", "RampUpBN", "StopBurstBN"]
     @assert System in valid_systems "$System is not a valid System: $valid_systems"
 
     tmax = num_T*ΔT
@@ -185,7 +185,7 @@ The timescale is much longer than for the Lorenz, and thus needs a lot more time
 
 - RampUpBN : Starts with the a cycle, and adds bursting loops; g=2->4
 
-SuddenBurstBN : Starts with the limit cycle, and ends in the standard bursting neuron regime; g=10.1->10.25
+StopBurstBN : Starts with the limit cycle, and ends in the standard bursting neuron regime; g=10.1->10.25
 
 Parameters
 ----------
@@ -213,10 +213,10 @@ Returns
 time series : Time series of the specified system (AbstractMatrix)
 """
 function ns_3d_benchmark(System::String, ; p_change=linear, num_T=15000, ΔT=0.01, transient_T=100, plot_title="", PLOT=true, save_dir="", SAVE=true, process_noise_level=0.0,u0=nothing, snapshots=false, eval=false, eval_run=0, plot_params=false)
-    valid_systems = ["RampUpBN", "SuddenBurstBN", "ExplodingLorenz", "ShiftingLorenz", "ShrinkingLorenz", "PaperLorenzBigChange", "PaperLorenzSmallChange"]
+    valid_systems = ["RampUpBN", "StopBurstBN", "ExplodingLorenz", "ShiftingLorenz", "ShrinkingLorenz", "PaperLorenzBigChange", "PaperLorenzSmallChange"]
     @assert System in valid_systems "$System is not a valid System: $valid_systems"
 
-    u0 = u0 === nothing ? [0.5,0.5,0.5] : u0
+    u0 = u0 === nothing ? [0.4, 0.4, 0.8] : u0
     t₀ = 0.0
     tmax = num_T* ΔT
     ns_model = ns_benchmark_systems(System, p_change, tmax, zeros(3), u0=u0, transient_T=transient_T,t₀=t₀)

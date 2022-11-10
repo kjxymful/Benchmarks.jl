@@ -3,7 +3,7 @@ using ArgParse
 
 function generate_benchmarks(args::Dict{String, Any})
     valid_std_systems = ["standard_bursting", "standard_lorenz", "bursting_limit_cycle", "lorenz_limit_cycle"]
-    valid_ns_systems = ["RampUpBN","SuddenBurstBN","ExplodingLorenz", "ShiftingLorenz", "ShrinkingLorenz", "PaperLorenzBigChange", "PaperLorenzSmallChange"]
+    valid_ns_systems = ["RampUpBN","StopBurstBN","ExplodingLorenz", "ShiftingLorenz", "ShrinkingLorenz", "PaperLorenzBigChange", "PaperLorenzSmallChange"]
     valid_trial_systems = ["trial_lorenz", "split_lorenz"]
     valid_regimes = ["bursting_neuron_regimes"]
 

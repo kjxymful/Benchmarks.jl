@@ -65,7 +65,7 @@ The timescale is much longer than for the Lorenz, and thus needs a lot more time
 
 - RampUpBN : Starts with the a cycle, and adds bursting loops; g=2->4
 
-- SuddenBurstBN : Not implemented
+- StopBurstBN : Starts with the complicated cycle at g=9.25 and ends in a limit cycle at g=10.15
 
 ### Trial Benchmark Systems
 - trial_lorenz : a lorenz with parameter shifting from 22->28 across trials
