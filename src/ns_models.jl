@@ -46,7 +46,7 @@ function ns_benchmark_systems(sys::String, par_fun::Function, tmax::AbstractFloa
             σ_final = σ_init
             β_final = β_init
             ρ_final = ρ_init
-            ρ_init = 22.0
+            ρ_init = 23.0
         elseif sys == "PaperLorenzBigChange"
             σ_final = σ_init
             β_final = β_init

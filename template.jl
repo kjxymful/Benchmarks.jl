@@ -1,8 +1,7 @@
 using Benchmarks 
 using DynamicalSystems
+using Plots
 
-include("src/Benchmarks.jl")
-using .Benchmarks
 
 T = 150
 transient_T = 10
@@ -10,7 +9,7 @@ u0 = [0.5,0.5,0.5]
 # Δt is another kwarg
 
 BN = bursting_neuron(gₙₘ₀ₐ=9, process_noise=zeros(3), u0=u0) # same for lorenz
-ts = generate_trajectories(BN, T, transient_T)
+ts = generate_trajectories(BN, T, transient_T,PLOT=false)
 
 # non-stationary 
 jacobian = ns_lorenz!
@@ -21,9 +20,9 @@ jacobian = ns_lorenz!
 parameters = [σ,ρ,β]
 
 ns_Lorenz = ns_systems(jacobian,parameters, u0, "temlate")
-ts = generate_trajectories(ns_Lorenz, T, transient_T)
+ts = generate_trajectories(ns_Lorenz, T, transient_T,PLOT=false)
 # or 
 ns_CLorenz = ContinuousDynamicalSystem(jacobian, u0,parameters,t0=0.0)
-ts = generate_trajectories(ns_CLorenz, T, transient_T)
+ts = generate_trajectories(ns_CLorenz, T, transient_T,PLOT=false)
 # or
 ts = trajectory(ns_CLorenz, T, Ttr=transient_T)

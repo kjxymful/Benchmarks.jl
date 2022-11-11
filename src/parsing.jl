@@ -59,9 +59,9 @@ end
 
 Parses all commandline arguments for execution of `generate_benchmarks.jl`.
 """
-function parse_commandline()
+function parse_commandline(;path="")
     settings = ArgParseSettings()
-    defaults = load_defaults()
+    defaults = load_defaults(path)
 
     @add_arg_table settings begin
         # meta
@@ -148,8 +148,8 @@ function parse_commandline()
     return parse_args(settings)
 end
 
-load_defaults() =
-    convert_to_Float32(JSON.parsefile(joinpath(pwd(), "settings", "benchmark_defaults.json")))
+load_defaults(path::String) =
+    convert_to_Float32(JSON.parsefile(joinpath(pwd(), path*"settings", "benchmark_defaults.json")))
 
 function convert_to_Float32(dict::Dict)
     for (key, val) in dict

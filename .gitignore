@@ -3,4 +3,5 @@
 /data
 .vscode
 /docs
-*.png
+Figures/
+*comparison_integrators.png

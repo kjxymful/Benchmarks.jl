@@ -1,13 +1,13 @@
 module Benchmarks
 
 include("ds_equations.jl")
-export loop_burstn!, ns_bursting_neuron!, ns_lorenz!
+export loop_burstn!, ns_bursting_neuron!, ns_lorenz!, loop_lorenz!
 
 include("ds_models.jl")
-export lorenz, bursting_neuron
+export lorenz, bursting_neuron, ds_systems
 
 include("ns_models.jl")
-export ns_benchmark_systems, ns_systems_bench
+export ns_benchmark_systems, ns_systems_bench, ns_systems
 
 include("utils.jl")
 export gen_path, save_series, generate_trajectories, sigmoid, linear, exponential

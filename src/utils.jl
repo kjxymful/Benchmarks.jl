@@ -49,9 +49,9 @@ function generate_trajectories(model::GeneralizedDynamicalSystem, tmax, transien
         else
             p = plot3d(u_std[1:end, 1], u_std[1:end, 2], u_std[1:end, 3],
                 grid=true,
-                lc=cgrad(:viridis), line_z=t[1:end] * 100,
+                lc=cgrad(:viridis), line_z=t[1:end],
                 colorbar_title=" \n \ntime",
-                right_margin=1.5Plots.mm, title=plot_title)
+                right_margin=1.5Plots.mm, title=plot_title,label=nothing)
         end
         if !isempty(pl_params)
             p_par = plot_param(pl_params, t, transient_T, model_name)
@@ -114,15 +114,15 @@ function generate_trajectories(model::AbstractDynamicalSystem, tmax::AbstractFlo
             plot3d!(p,uS0[:, 1], uS0[:, 2], uS0[:, 3],
                 grid=true,
                 xlabel="x", ylabel="y", zlabel="z",
-                lc=:red, label="t\$\\leq\$0", linealpha=1, title=plot_title)
+                lc=:red, label="t\$\\leq\$0", linealpha=1, title=plot_title, legend=nothing)
             
         else
             p = plot3d(u_std[1:end, 1], u_std[1:end, 2], u_std[1:end, 3],
                 grid=true,
                 xlabel="x", ylabel="y", zlabel="z",
-                lc=cgrad(:viridis), line_z=t[1:end] * 100,
+                lc=cgrad(:viridis), line_z=t[1:end],
                 colorbar_title=" \n \ntime",
-                right_margin=1.5Plots.mm, title=plot_title)
+                right_margin=1.5Plots.mm, title=plot_title,legend=nothing)
         end
         if !isempty(pl_params)
             p_par = plot_param(pl_params, t, 0, model_name)

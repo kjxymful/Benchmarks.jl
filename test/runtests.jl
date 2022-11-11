@@ -25,6 +25,7 @@ end
     transient_T = args["transient_T"]
     for sys in all_sys
         args["name"] = sys
+        @show sys
         if occursin("BN", sys) || occursin("bursting", sys)
             args["num_T"] = num_T * 10
             args["transient_T"] = transient_T * 10
@@ -34,8 +35,6 @@ end
         end
         generate_benchmarks(args)
     end
-    rm("data/", recursive=true)
-    rm("Figures/", recursive=true)
 
     @testset "Trials" begin
         for sys in valid_trial_systems
