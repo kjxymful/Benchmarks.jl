@@ -4,7 +4,7 @@ using Plots
 
 sys, params = ns_benchmark_systems("ShrinkingLorenz", linear, 150.0f0, zeros(3), transient_T=50)
 ts = trajectory(sys, 150, Ttr=50)
-p = plot3d(ts[:, 1], ts[:, 2], ts[:, 3], border=:none,background_color=:black, axis=nothing,size=(800,400), legend=nothing, lc=(:viridis), linez=collect(0:0.01:150))
+p = plot3d(ts[:, 1], ts[:, 2], ts[:, 3], border=:none,background_color=:black, axis=nothing,size=(900,400), legend=nothing, lc=(:viridis), linez=collect(0:0.01:150))
 savefig("examples/head.png")
 display(p)
 
