@@ -3,7 +3,6 @@ using DynamicalSystems, GLMakie
 
 function interactive_benchmarks(args::Dict{String,Any})
     sys_name = args["name"]
-    check_validity(sys_name)
     if occursin("Lorenz", sys_name)
         sys = lorenz()
         ps = Dict(
@@ -25,7 +24,7 @@ function interactive_benchmarks(args::Dict{String,Any})
             )
             lims=((-30,45),(-120,80),(0,250))
         end
-    elseif occursin("BN",sys_name)
+    elseif occursin("BN",sys_name) || occursin("Bursting", sys_name) || occursin("bursting",sys_name)
         sys = bursting_neuron()
         ps = Dict(
             18 => 2:0.1:12.5

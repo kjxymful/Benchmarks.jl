@@ -13,6 +13,11 @@ Or enter the package manager in the Juila REPL, and add the package with:
 ```
 (@v1.8) pkg> add github_link
 ```
+## Explore Data
+An interactive Exploration tool is available. Choose one of the available Systems and set interactive to true.
+Via commandline ```julia --project main.jl --interactive true```
+or in the benchmarks_defaults.json
+Available Systems: Lorenz63, BurstingNeuron (Can also be any of the Benchmark Systems)
 
 ## Generate Data
 from directory do
