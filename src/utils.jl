@@ -142,3 +142,14 @@ function generate_trajectories(model::AbstractDynamicalSystem, tmax::AbstractFlo
 end
 
 
+function check_validity(sys::String)
+    valid_std_systems = ["standard_bursting", "standard_lorenz", "bursting_limit_cycle", "lorenz_limit_cycle"]
+    valid_ns_systems = ["RampUpBN","StopBurstBN","ExplodingLorenz", "ShiftingLorenz", "ShrinkingLorenz", "PaperLorenzBigChange", "PaperLorenzSmallChange"]
+    valid_trial_systems = ["trial_lorenz", "split_lorenz"]
+    valid_regimes = ["bursting_neuron_regimes"]
+
+    if !any(x->sys in x, [valid_ns_systems,valid_trial_systems, valid_std_systems,valid_regimes])
+        throw("$benchmark_system is not a valid system")
+    end
+    return true
+end

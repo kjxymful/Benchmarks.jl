@@ -1,11 +1,9 @@
 using JSON
 using ArgParse
 
+
 function generate_benchmarks(args::Dict{String, Any})
-    valid_std_systems = ["standard_bursting", "standard_lorenz", "bursting_limit_cycle", "lorenz_limit_cycle"]
-    valid_ns_systems = ["RampUpBN","StopBurstBN","ExplodingLorenz", "ShiftingLorenz", "ShrinkingLorenz", "PaperLorenzBigChange", "PaperLorenzSmallChange"]
-    valid_trial_systems = ["trial_lorenz", "split_lorenz"]
-    valid_regimes = ["bursting_neuron_regimes"]
+
 
     benchmark_system = args["name"]::String
     process_noise_level = args["process_noise_level"]::Float32
@@ -24,10 +22,7 @@ function generate_benchmarks(args::Dict{String, Any})
     plot_params = args["plot_params"]
     plot_name = args["exp_name"]
 
-    if !any(x->benchmark_system in x, [valid_ns_systems,valid_trial_systems, valid_std_systems,valid_regimes])
-        throw("$benchmark_system is not a valid system")
-    end
-
+    check_validity(benchmark_system)
     if benchmark_system in valid_std_systems
         std_3d_benchmark(benchmark_system, num_T=num_T, ΔT=ΔT, transient_T=transient_T, 
                         plot_title=plot_title, PLOT=PLOT, save_dir=save_dir, SAVE=SAVE,MARKER=MARKERS,
@@ -53,6 +48,8 @@ function generate_benchmarks(args::Dict{String, Any})
         throw("something went wrong")
     end
 end
+
+
 
 """
     parse_commandline()
@@ -144,6 +141,11 @@ function parse_commandline(;path="")
         help = "name as which to save the plot"
         arg_type = String
         default = defaults["exp_name"] |> String
+        
+        "--interactive"
+        help="starts the interactive exploration framework"
+        arg_type = Bool
+        default = defaults["interactive"] |> Bool
     end
     return parse_args(settings)
 end

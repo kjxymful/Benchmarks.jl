@@ -15,6 +15,9 @@ export gen_path, save_series, generate_trajectories, sigmoid, linear, exponentia
 include("trial_ns.jl")
 export trial_ns_lorenz,split_lorenz_trials
 
+include("interactive.jl")
+export interactive_benchmarks
+
 include("parsing.jl")
 export parse_commandline, generate_benchmarks
 

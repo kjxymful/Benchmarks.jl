@@ -17,13 +17,13 @@ Or enter the package manager in the Juila REPL, and add the package with:
 ## Generate Data
 from directory do
 ```
-julia --project generate_benchmarks.jl
+julia --project main.jl
 ```
 with arguments specified in settings/benchmark_defaults.json, i.e. you need a folder settings with benchmark_defaults.json in the parent directory
 
 or in commandline with
 ```
-julia --project generate_benchmarks.jl --kwarg values
+julia --project main.jl --kwarg values
 ```
 choose the benchmark system with --name 
 

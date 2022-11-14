@@ -1,18 +1,24 @@
 {
-    "name": "bursting_neuron_regimes",
+    "name": "StopBurstBN",
+    "exp_name": "",
+    
     "process_noise_level": 0.00,
     "num_T": 150000,
-    "delta_T": 0.01,
+    "delta_T": 0.05,
     "transient_T": 500,
     "p_change": "linear",
+    
     "PLOT": true,
     "plot_title": "",
     "snapshots": true,
     "plot_params": true,
-    "exp_name": "regimes_5",
     "MARKERS": false,
+
     "SAVE": true,
     "save_dir": "",
+
     "num_trials": 50,
-    "lorenz_trial_sys": "ShiftingLorenz"
+    "lorenz_trial_sys": "ShiftingLorenz",
+
+    "interactive":false
 }
