@@ -1,4 +1,3 @@
-using StatsBase
 
 """
 an object defining the pre chosen ns systems
@@ -24,16 +23,15 @@ Returns
 -------
 Initialized ns_systems for the lorenz ns benchmarks
 """
-function ns_benchmark_systems(sys::String, par_fun::Function, tmax::AbstractFloat, process_noise_level::Vector{Float64}; u0=[0.4,0.4,0.8], transient_T=0.0,t₀=0.0)
-    valid_models = ["RampUpBN", "StopBurstBN", "ExplodingLorenz", "ShrinkingLorenz", "ShiftingLorenz","PaperLorenzBigChange", "PaperLorenzSmallChange"]
-    if !(sys in valid_models)
-        throw("$sys is not a valid system:$valid_models")
+function ns_benchmark_systems(sys::String, par_fun::Function, tmax::AbstractFloat; u0=[0.4,0.4,0.8], transient_T=0.0,t₀=0.0)::Tuple{ContinuousDynamicalSystem, AbstractVector}
+    if !(sys in valid_ns_systems)
+        throw("$sys is not a valid system:$valid_ns_systems")
     end
     if occursin("Lorenz", sys)
         σ_init = 10.0
         ρ_init = 35.0
         β_init = 8 / 3
-        sys_fun = (du, u, p,t) -> ns_lorenz!(du, u, p, t, process_noise=process_noise_level)
+        sys_fun = (du, u, p,t) -> ns_lorenz!(du, u, p, t)
         if sys == "ShrinkingLorenz"
             σ_final = 7.0
             ρ_final = 22.0
@@ -68,7 +66,7 @@ function ns_benchmark_systems(sys::String, par_fun::Function, tmax::AbstractFloa
         end
     elseif occursin("BN",sys)
         u0 = [-1.33192587,0.00833237,0.01267124]
-        sys_fun = (du, u, p,t) -> ns_bursting_neuron!(du, u, p, t, process_noise=process_noise_level)
+        sys_fun = (du, u, p,t) -> ns_bursting_neuron!(du, u, p, t)
         if sys == "StopBurstBN"
             g_init = 9.25
             g_final = 10.15
@@ -100,16 +98,15 @@ end
 
 
 
-function ns_systems_bench(sys::String, par_fun::Function, tmax::AbstractFloat, process_noise_level::Vector{Float64}; u0=[0.4, 0.4, 0.8], transient_T=0.0,t₀=0.0)
-    valid_models = ["RampUpBN", "StopBurstBN", "ExplodingLorenz", "ShrinkingLorenz", "ShiftingLorenz","PaperLorenzBigChange", "PaperLorenzSmallChange"]
-    if !(sys in valid_models)
+function ns_systems_bench(sys::String, par_fun::Function, tmax::AbstractFloat; u0=[0.4, 0.4, 0.8], transient_T=0.0,t₀=0.0)::ns_systems
+    if !(sys in valid_ns_systems)
         throw("$sys is not a valid system:$valid_models")
     end
     if occursin("Lorenz", sys)
         σ_init = 10.0
         ρ_init = 28.0
         β_init = 8 / 3
-        sys_fun = (du, u, p,t) -> ns_lorenz!(du, u, p, t, process_noise=process_noise_level)
+        sys_fun = (du, u, p,t) -> ns_lorenz!(du, u, p, t)
         if sys == "ShrinkingLorenz"
             σ_final = 5.0
             ρ_final = 23.0
@@ -144,7 +141,7 @@ function ns_systems_bench(sys::String, par_fun::Function, tmax::AbstractFloat, p
         end
     elseif occursin("BN",sys)
         u0 = [-1.33192587,0.00833237,0.01267124]
-        sys_fun = (du, u, p,t) -> ns_bursting_neuron!(du, u, p, t, process_noise=process_noise_level)
+        sys_fun = (du, u, p,t) -> ns_bursting_neuron!(du, u, p, t)
         if sys == "StopBurstBN"
             g_init = 9.25
             g_final = 10.25

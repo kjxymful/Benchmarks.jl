@@ -1,5 +1,3 @@
-using StatsBase
-using DynamicalSystems
 
 abstract type AbstractDynamicalSystem end
 
@@ -47,10 +45,10 @@ function bursting_neuron(; u0=[-24.4694, 0.0386, 0.0231],
     Vₕₘ=-15,
     kₘ=5,
     τₕ=200,
-    gₙₘ₀ₐ=10.2,process_noise=zeros(3),t₀=0.0)
+    gₙₘ₀ₐ=10.2,t₀=0.0)::ContinuousDynamicalSystem
     p = [I, Cₘ, gₗ, Eₗ, gₙₐ, Eₙₐ, Vₕₙₐ, kₙₐ, gₖ, Eₖ, Vₕₖ, kₖ, τₙ, gₘ, Vₕₘ, kₘ, τₕ, gₙₘ₀ₐ]
-    jac = (du,u,par,t) -> loop_burstn!(du,u,par,t,process_noise=process_noise)
-    ds = ContinuousDynamicalSystem(jac, u0, p,t0=t₀)
+    rhs = (du,u,par,t) -> loop_burstn!(du,u,par,t)
+    ds = ContinuousDynamicalSystem(rhs, u0, p,t0=t₀)
     return ds
 end
 
@@ -75,31 +73,29 @@ function bursting_neuron(method_holder::String; u0=[-24.4694, 0.0386, 0.0231],
     Vₕₘ=-15.0,
     kₘ=5.0,
     τₕ=200.0,
-    gₙₘ₀ₐ=10.2,
-    process_noise=zeros(3))
+    gₙₘ₀ₐ=10.2)::ds_sytem
     p = [I, Cₘ, gₗ, Eₗ, gₙₐ, Eₙₐ, Vₕₙₐ, kₙₐ, gₖ, Eₖ, Vₕₖ, kₖ, τₙ, gₘ, Vₕₘ, kₘ, τₕ, gₙₘ₀ₐ]
-    ds = ds_sytem((du, u, param, t) -> loop_burstn!(du, u, param, t, process_noise=process_noise), p, u0, "bursting_neuron")
+    ds = ds_sytem((du, u, param, t) -> loop_burstn!(du, u, param, t), p, u0, "bursting_neuron")
     return ds
 end
 
 
-function lorenz(;u0=[0.5,0.5,0.5], ρ=28.0, σ=10.0, β=8/3, process_noise=zeros(3), p=[],t₀=0.0)
+function lorenz(;u0=[0.5,0.5,0.5], ρ=28.0, σ=10.0, β=8/3, p=[],t₀=0.0)::ContinuousDynamicalSystem
     if isempty(p)
         p = [σ, ρ, β]
     else
         p=p
     end
-    jac = (du,u,par,t) -> loop_lorenz!(du,u,par,t,process_noise=process_noise)
-    return ContinuousDynamicalSystem(jac, u0,p,t0=t₀)
+    rhs = (du,u,par,t) -> loop_lorenz!(du,u,par,t)
+    return ContinuousDynamicalSystem(rhs, u0,p, Systems.lorenz_iip().jacobian,t0=t₀)
 end
 
 
-function lorenz(method_holder::String; u0=[0.5,0.5,0.5], ρ=28.0, σ=10.0, β=8/3, process_noise=zeros(3), p=[])
+function lorenz(method_holder::String; u0=[0.5,0.5,0.5], ρ=28.0, σ=10.0, β=8/3, p=[])::ds_sytem
     if isempty(p)
         p = [σ, ρ, β]
     else
         p=p
     end
-    return ds_sytem((du,u,p,t)->loop_lorenz!(du,u,p,t,process_noise=process_noise), p, u0, "lorenz")
+    return ds_sytem((du,u,p,t)->loop_lorenz!(du,u,p,t), p, u0, "lorenz")
 end
-

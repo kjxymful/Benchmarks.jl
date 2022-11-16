@@ -1,5 +1,5 @@
-using DifferentialEquations
-using DynamicalSystems
+using Plots: plot, plot!
+using Plots
 
 function plot_param(params, time, Ttr,model_name)
     time1 = time .+ Ttr
@@ -32,8 +32,9 @@ save_name : as what to save the file
 
 *Plotting to Figures/*
 """
-function generate_trajectories(model::GeneralizedDynamicalSystem, tmax, transient_T::Int; Δt=0.01, t₀=0.0, STD=false, PLOT=true, plot_title="", eval=false, eval_run=0, save_name="", model_name="", pl_params=[])
-    ts = trajectory(model, tmax; Δt=Δt, Ttr=transient_T)
+function generate_trajectories(model::GeneralizedDynamicalSystem, tmax, transient_T::Int; Δt=0.01, t₀=0.0, process_noise_level=0.0, STD=true, save_name="", PLOT=true, plot_title="", pl_params=zeros(3), eval=false, eval_run=0, model_name="")::AbstractMatrix
+    std_ = process_noise_level==0 ? [0,0,0] : std_model(model, tmax, transient_T;Δt,t₀)
+    ts = trajectory(model, tmax; Δt=Δt, Ttr=transient_T, diffeq=(alg=Tsit5(), callback=dynamical_noise_callback(process_noise_level, std_)))
     u = Matrix(ts)
     u_std = StatsBase.standardize(ZScoreTransform, u, dims=1)
 
@@ -95,11 +96,13 @@ end
 """
 uses DifferentialEquations
 """
-function generate_trajectories(model::AbstractDynamicalSystem, tmax::AbstractFloat, skip_steps::Int; Δt=0.01, t₀=0.0, PLOT=true, plot_title="", eval=false, eval_run=0, save_name="", pl_params=[],model_name="")
+function generate_trajectories(model::AbstractDynamicalSystem, tmax::AbstractFloat, skip_steps::Int; Δt=0.01, t₀=0.0, process_noise_level=0.0, STD=true,PLOT=true, plot_title="", eval=false, eval_run=0, save_name="", pl_params=[],model_name="")
     tspan = (t₀, tmax)
 
     prob = ODEProblem(model.sys, model.u0, tspan, model.params)
-    sol = solve(prob)
+    transient_T = skip_steps
+    std_ = process_noise_level==0 ? [0,0,0] : std_model(prob, tmax, transient_T;Δt,t₀)
+    sol = solve(prob, Tsit5(), callback=dynamical_noise_callback(process_noise_level,std_))
 
     u = [sol(t) for t in (t₀+skip_steps*Δt):Δt:tmax]
     u = permutedims(hcat(u...))
@@ -138,18 +141,39 @@ function generate_trajectories(model::AbstractDynamicalSystem, tmax::AbstractFlo
             savefig(p, "Figures/data/$save_name.png")
         end
     end
-    return u
+    if STD
+        return u_std
+    else
+        return u
+    end
 end
 
 
 function check_validity(sys::String)
-    valid_std_systems = ["standard_bursting", "standard_lorenz", "bursting_limit_cycle", "lorenz_limit_cycle"]
-    valid_ns_systems = ["RampUpBN","StopBurstBN","ExplodingLorenz", "ShiftingLorenz", "ShrinkingLorenz", "PaperLorenzBigChange", "PaperLorenzSmallChange"]
-    valid_trial_systems = ["trial_lorenz", "split_lorenz"]
-    valid_regimes = ["bursting_neuron_regimes"]
-
     if !any(x->sys in x, [valid_ns_systems,valid_trial_systems, valid_std_systems,valid_regimes])
         throw("$benchmark_system is not a valid system")
     end
     return true
 end
+
+function dynamical_noise_callback(dynamical_noise_level::AbstractFloat, std::AbstractVector)::DiscreteCallback
+    noise_level = dynamical_noise_level .* std
+    dn = dynamical_noise_level == 0 ? false : true
+    condition(u, t, integrator) = dn
+    affect!(integrator) = set_state!(integrator, get_state(integrator) .+ ϵ.(noise_level))
+    cb = DiscreteCallback(condition, affect!)
+    return cb
+end
+
+function std_model(ds::ContinuousDynamicalSystem,tmax, transient_T::Int; Δt=0.01, t₀=0.0)
+    tseries = Matrix(trajectory(ds, tmax, Ttr=transient_T,Δt=Δt, t0=t₀))
+    std_ = [std(tseries[:, i]) for i in axes(tseries, 2)]
+    return std_
+end
+
+function std_model(ds::ODEProblem, tmax,transient_T;Δt=0.01,t₀=0.0)
+    cde = ContinuousDynamicalSystem(ds)
+    return std_model(cde, tmax,transient_T;Δt,t₀)
+end
+
+ϵ(process_noise::AbstractFloat)::AbstractFloat = randn() * process_noise

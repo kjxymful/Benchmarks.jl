@@ -1,8 +1,8 @@
 {
-    "name": "ShrinkingLorenz",
+    "name": "standard_lorenz",
     "exp_name": "",
     
-    "process_noise_level" : 0.00,
+    "process_noise_level" : 0.0,
     "num_T" : 15000,
     "delta_T" : 0.01,
     "transient_T" : 50,
@@ -20,5 +20,6 @@
     "num_trials": 50,
     "lorenz_trial_sys" : "ShiftingLorenz",
 
-    "interactive":true
+    "interactive":true,
+    "interactive_noise":0.05
 }

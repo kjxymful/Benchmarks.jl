@@ -1,14 +1,14 @@
 using Benchmarks 
 using DynamicalSystems
 using Plots
-
+using Statistics
 
 T = 150
 transient_T = 10
 u0 = [0.5,0.5,0.5] 
 # Δt is another kwarg
 
-BN = bursting_neuron(gₙₘ₀ₐ=9, process_noise=zeros(3), u0=u0) # same for lorenz
+BN = bursting_neuron(gₙₘ₀ₐ=10.2, process_noise=zeros(3), u0=u0) # same for lorenz
 ts = generate_trajectories(BN, T, transient_T,PLOT=false)
 
 # non-stationary 
