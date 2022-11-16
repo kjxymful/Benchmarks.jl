@@ -1,10 +1,9 @@
-using InteractiveDynamics
-using DynamicalSystems, GLMakie
+using InteractiveDynamics, Makie, GLMakie
 
 function interactive_benchmarks(args::Dict{String,Any})
     sys_name = args["name"]
-    if occursin("Lorenz", sys_name)
-        sys = lorenz()
+    pn = args["interactive_noise"]
+    if occursin("Lorenz", sys_name) || occursin("lorenz",sys_name)
         ps = Dict(
             1 => 0:1:30,
             2 => 0:1:40,
@@ -15,8 +14,9 @@ function interactive_benchmarks(args::Dict{String,Any})
         u2=[40,10,-10]
         u0s=[u1,u2]
         lims = ((-20,40),(-25,25),(-10,60))
-        total_span=10
+        total_span=10f0
         if occursin("Paper", sys_name)
+            std = [20,32,30]
             ps = Dict(
                 1 => 0:1:30,
                 2 => 140:1:180,
@@ -24,6 +24,7 @@ function interactive_benchmarks(args::Dict{String,Any})
             )
             lims=((-30,45),(-120,80),(0,250))
         end
+        sys = lorenz()
     elseif occursin("BN",sys_name) || occursin("Bursting", sys_name) || occursin("bursting",sys_name)
         sys = bursting_neuron()
         ps = Dict(
@@ -36,9 +37,24 @@ function interactive_benchmarks(args::Dict{String,Any})
         u2 = [0,0,0]
         u0s = [u1,u2]
         lims = ((-70,0),(0,0.6),(0,0.08))
-        total_span=250
+        total_span=250f0
     else
         throw("Not Implemented $sys_name")
     end
-    interactive_evolution(sys, u0s; ps, pnames, lims, colors=[:red, :blue], total_span)
+    std_ = pn==0 ? [0,0,0] : std_model(sys,total_span,Int(total_span÷10))
+    interactive_evolution(sys, u0s; ps, pnames, lims, colors=[:red, :blue], total_span,diffeq=(alg=Tsit5(), callback=dynamical_noise_parallel_callback(pn,std_)))
+end
+
+
+function dynamical_noise_parallel_callback(dynamical_noise_level::AbstractFloat, std::AbstractVector)::DiscreteCallback
+    noise_level = dynamical_noise_level .* std
+    dn = dynamical_noise_level == 0 ? false : true
+    condition(u, t, integrator) = dn
+    function affect_pint!(integrator)
+        for i in 1:2
+            set_state!(integrator, get_state(integrator, i) .+ ϵ.(noise_level), i)
+        end
+    end
+    cb = DiscreteCallback(condition, affect_pint!)
+    return cb
 end

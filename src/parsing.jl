@@ -2,20 +2,19 @@ using JSON
 using ArgParse
 
 
-function generate_benchmarks(args::Dict{String, Any})
-
+function generate_benchmarks(args::Dict{String,Any})
 
     benchmark_system = args["name"]::String
-    process_noise_level = args["process_noise_level"]::Float32
+    process_noise_level = args["process_noise_level"]::AbstractFloat
     num_T = args["num_T"]::Int
-    ΔT = args["delta_T"]::Float32
+    Δt = args["delta_T"]::AbstractFloat
     transient_T = args["transient_T"]::Int
     PLOT = args["PLOT"]::Bool
     plot_title = args["plot_title"]::String
     SAVE = args["SAVE"]::Bool
     save_dir = args["save_dir"]::String
     num_trials = args["num_trials"]::Int
-    MARKERS = args["MARKERS"]::Bool
+    MARKER = args["MARKERS"]::Bool
     p_change = args["p_change"]::String
     lorenz_sys = args["lorenz_trial_sys"]::String
     snapshots = args["snapshots"]
@@ -24,26 +23,22 @@ function generate_benchmarks(args::Dict{String, Any})
 
     check_validity(benchmark_system)
     if benchmark_system in valid_std_systems
-        std_3d_benchmark(benchmark_system, num_T=num_T, ΔT=ΔT, transient_T=transient_T, 
-                        plot_title=plot_title, PLOT=PLOT, save_dir=save_dir, SAVE=SAVE,MARKER=MARKERS,
-                        process_noise_level=process_noise_level,plot_name=plot_name)
+        std_3d_benchmark(benchmark_system; num_T, Δt,transient_T,plot_title,PLOT, save_dir, SAVE, MARKER,
+            process_noise_level, plot_name)
     elseif benchmark_system in valid_regimes
-        bursting_neuron_regimes(num_T=num_T, ΔT=ΔT, transient_T=transient_T,
-                                PLOT=PLOT, save_dir=save_dir, SAVE=SAVE,
-                                process_noise_level=process_noise_level,plot_name=plot_name)
+        bursting_neuron_regimes(;num_T, Δt,transient_T,PLOT, save_dir,SAVE,
+            process_noise_level, plot_name)
     elseif benchmark_system in valid_ns_systems
-        
-
         p_sym = Symbol(p_change)
-        p_change_fun = @eval $p_sym
-        ns_3d_benchmark(benchmark_system, p_change=p_change_fun, num_T=num_T, ΔT=ΔT, transient_T=transient_T,
-                        plot_title=plot_title,PLOT=PLOT, save_dir=save_dir,SAVE=SAVE, 
-                        process_noise_level=process_noise_level, snapshots=snapshots,
-                        plot_params=plot_params, plot_name=plot_name)
+        p_change = @eval $p_sym
+        ns_3d_benchmark(benchmark_system; p_change, num_T, Δt,transient_T,
+            plot_title, PLOT, save_dir, SAVE,
+            process_noise_level, snapshots,
+            plot_params, plot_name)
     elseif benchmark_system in valid_trial_systems
-        trial_benchmark("split_lorenz", num_trials, seq_length=num_T, ΔT=ΔT, transient_T=transient_T, 
-                        plot_title=plot_title, PLOT=PLOT, save_dir=save_dir,SAVE=SAVE,
-                        process_noise_level=process_noise_level ,lorenz_sys=lorenz_sys)
+        trial_benchmark("split_lorenz", num_trials; seq_length=num_T, Δt, transient_T,
+            plot_title, PLOT, save_dir, SAVE,
+            process_noise_level, lorenz_sys)
     else
         throw("something went wrong")
     end
@@ -60,7 +55,7 @@ function parse_commandline(;path="")
     settings = ArgParseSettings()
     defaults = load_defaults(path)
 
-    @add_arg_table settings begin
+    @add_arg_table! settings begin
         # meta
         "--name"
         help = "The benchmark name"
@@ -146,6 +141,11 @@ function parse_commandline(;path="")
         help="starts the interactive exploration framework"
         arg_type = Bool
         default = defaults["interactive"] |> Bool
+
+        "--interactive_noise"
+        help="adds process noise as slider"
+        arg_type = Float32
+        default = defaults["interactive_noise"] |> Float32
     end
     return parse_args(settings)
 end
