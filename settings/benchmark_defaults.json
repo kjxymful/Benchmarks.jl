@@ -20,6 +20,6 @@
     "num_trials": 50,
     "lorenz_trial_sys" : "ShiftingLorenz",
 
-    "interactive":true,
-    "interactive_noise":true
+    "interactive":false,
+    "interactive_noise":false
 }
