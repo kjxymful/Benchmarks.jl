@@ -1,7 +1,7 @@
 module InteractiveBenchmarks
 
-using InteractiveDynamics, Makie, GLMakie, DynamicalSystems
-using DifferentialEquations
+using InteractiveDynamics, GLMakie, DynamicalSystems
+using OrdinaryDiffEq
 
 export interactive_benchmarks
 include("ds_pn_models.jl")
