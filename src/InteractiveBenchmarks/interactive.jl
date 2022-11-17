@@ -1,5 +1,3 @@
-using InteractiveDynamics, Makie, GLMakie
-
 function interactive_benchmarks(args::Dict{String,Any})
     sys_name = args["name"]
     pn = args["interactive_noise"]
@@ -45,16 +43,3 @@ function interactive_benchmarks(args::Dict{String,Any})
     interactive_evolution(sys, u0s; ps, pnames, lims, colors=[:red, :blue], total_span,diffeq=(alg=Tsit5(), callback=dynamical_noise_parallel_callback(pn,std_)))
 end
 
-
-function dynamical_noise_parallel_callback(dynamical_noise_level::AbstractFloat, std::AbstractVector)::DiscreteCallback
-    noise_level = dynamical_noise_level .* std
-    dn = dynamical_noise_level == 0 ? false : true
-    condition(u, t, integrator) = dn
-    function affect_pint!(integrator)
-        for i in 1:2
-            set_state!(integrator, get_state(integrator, i) .+ ϵ.(noise_level), i)
-        end
-    end
-    cb = DiscreteCallback(condition, affect_pint!)
-    return cb
-end
