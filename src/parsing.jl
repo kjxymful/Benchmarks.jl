@@ -6,7 +6,7 @@ function generate_benchmarks(args::Dict{String,Any})
 
     benchmark_system = args["name"]::String
     process_noise_level = args["process_noise_level"]::AbstractFloat
-    num_T = args["num_T"]::Int
+    T = args["T"]::Real
     Δt = args["delta_T"]::AbstractFloat
     transient_T = args["transient_T"]::Int
     PLOT = args["PLOT"]::Bool
@@ -21,22 +21,43 @@ function generate_benchmarks(args::Dict{String,Any})
     plot_params = args["plot_params"]
     plot_name = args["exp_name"]
 
+    T_BN = 1500
+    T_L = 150
+    dt_BN = 0.05
+    dt_L = 0.05
+    Ttr_BN = 500
+    Ttr_L = 20
+
+    if T == 150 && transient_T == 20 && Δt == 0.01f0
+        if occursin("BN", benchmark_system) || occursin("bursting", benchmark_system) || occursin("Bursting", benchmark_system)
+            T = T_BN
+            Δt = dt_BN
+            transient_T = Ttr_BN
+        end
+    else
+        msg = "Systems can look very differently. Default values are:\n"
+        msg= msg*"-"^50*"\nLorenz:\n"*"  T=$T_L,Δt=$dt_L,transient_T=$Ttr_L \n"*"-"^50*"\nBurstingNeuron:\n"*"  T=$T_BN,Δt=$dt_BN,transient_T=$Ttr_BN"        
+        @warn "You are not using the default values: T=$T_L,Δt=$dt_L,transient_T=$Ttr_L. Used values are:", [T,Δt,transient_T]
+        println(msg)
+    end
+
+
     check_validity(benchmark_system)
     if benchmark_system in valid_std_systems
-        std_3d_benchmark(benchmark_system; num_T, Δt,transient_T,plot_title,PLOT, save_dir, SAVE, MARKER,
+        std_3d_benchmark(benchmark_system; T, Δt,transient_T,plot_title,PLOT, save_dir, SAVE, MARKER,
             process_noise_level, plot_name)
     elseif benchmark_system in valid_regimes
-        bursting_neuron_regimes(;num_T, Δt,transient_T,PLOT, save_dir,SAVE,
+        bursting_neuron_regimes(;T, Δt,transient_T,PLOT, save_dir,SAVE,
             process_noise_level, plot_name)
     elseif benchmark_system in valid_ns_systems
         p_sym = Symbol(p_change)
         p_change = @eval $p_sym
-        ns_3d_benchmark(benchmark_system; p_change, num_T, Δt,transient_T,
+        ns_3d_benchmark(benchmark_system; p_change, T, Δt,transient_T,
             plot_title, PLOT, save_dir, SAVE,
             process_noise_level, snapshots,
             plot_params, plot_name)
     elseif benchmark_system in valid_trial_systems
-        trial_benchmark("split_lorenz", num_trials; seq_length=num_T, Δt, transient_T,
+        trial_benchmark("split_lorenz", num_trials; seq_T=T, Δt, transient_T,
             plot_title, PLOT, save_dir, SAVE,
             process_noise_level, lorenz_sys)
     else
@@ -67,10 +88,10 @@ function parse_commandline(;path="")
         arg_type = Float32
         default = defaults["process_noise_level"] |> Float32
         
-        "--num_T"
+        "--T"
         help = "number of timesteps"
         arg_type = Int
-        default = defaults["num_T"] |> Int
+        default = defaults["T"] |> Int
 
         "--delta_T"
         help = "difference between timesteps"

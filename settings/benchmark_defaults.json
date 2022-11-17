@@ -1,11 +1,11 @@
 {
-    "name": "standard_lorenz",
+    "name": "RampUpBN",
     "exp_name": "",
     
-    "process_noise_level" : 0.0,
-    "num_T" : 15000,
+    "process_noise_level" : 0.1,
+    "T" : 150,
     "delta_T" : 0.01,
-    "transient_T" : 50,
+    "transient_T" : 20,
     "p_change": "linear",
 
     "PLOT" : true,
@@ -20,6 +20,6 @@
     "num_trials": 50,
     "lorenz_trial_sys" : "ShiftingLorenz",
 
-    "interactive":true,
+    "interactive":false,
     "interactive_noise":0.05
 }
