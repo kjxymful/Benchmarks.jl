@@ -1,9 +1,8 @@
-using Plots: plot, plot!
 using Plots
 using NPZ: npzwrite
 
 """
-    std_3d_benchmark(System::String; num_T=15000, ΔT=0.01, transient_T=2000, plot_title="", PLOT=true, save_dir="", SAVE=true, MARKERS=false)
+    std_3d_benchmark(System; T=150, Δt=0.01, transient_T=20, process_noise_level=0.0, PLOT=true, plot_title="", plot_name="", MARKER=false, save_dir="", SAVE=true)
 
 create a time series of the specified Benchmark System
 
@@ -44,11 +43,9 @@ Returns
 time series : Time series of the specified system (AbstractMatrix)
 
 """
-function std_3d_benchmark(System::String; num_T=15000, Δt=0.01, transient_T=2000, plot_title="", PLOT=true, save_dir="", SAVE=true, MARKER=false, process_noise_level=0.0, plot_name="")
+function std_3d_benchmark(System::String; T=150, Δt=0.01, transient_T=20, process_noise_level=0.0, PLOT=true, plot_title="", plot_name="", MARKER=false, save_dir="", SAVE=true)
     @assert System in valid_std_systems "$System is not a valid System: $valid_std_systems"
     exp_name = isempty(plot_name) ? String(System) : plot_name
-
-    tmax = num_T * Δt
 
     if System == "standard_bursting"
         ds::ContinuousDynamicalSystem = bursting_neuron()
@@ -63,9 +60,9 @@ function std_3d_benchmark(System::String; num_T=15000, Δt=0.01, transient_T=200
         μ = 23.0
         ds = lorenz(ρ=23.0)
     end
-    tseries = generate_trajectories(ds, tmax, transient_T;Δt, process_noise_level, PLOT=false, model_name=System)
+    tseries = generate_trajectories(ds, T, transient_T;Δt, process_noise_level, PLOT=false, model_name=System)
 
-    time = 0:Δt:(num_T*Δt)
+    time = 0:Δt:T
 
     if PLOT
         marker = MARKER ? :d : false
@@ -89,7 +86,7 @@ end
 
 
 """
-    bursting_neuron_regimes(; num_T=15000, ΔT=0.01, transient_T=2000, PLOT=true, save_dir="", SAVE=true, MARKER=false)
+    bursting_neuron_regimes(; T=1500, Δt=0.05, transient_T=500, process_noise_level=0.0, PLOT=true, plot_name="", save_dir="", SAVE=true)
 
 creates time series in different bursting neuron regimes for gₙₘ₀ₐ=[3,5,7,9,10,10.2]
 
@@ -116,15 +113,14 @@ Returns
 time series : Time series of the specified system (AbstractMatrix)
 
 """
-function bursting_neuron_regimes(; num_T=150000, Δt=0.01, transient_T=2000, PLOT=true, save_dir="", SAVE=true, process_noise_level=0.0, plot_name="")
+function bursting_neuron_regimes(; T=1500, Δt=0.05, transient_T=500, process_noise_level=0.0, PLOT=true, plot_name="", save_dir="", SAVE=true)
     μₛ = [3.0, 5.0, 7.0, 9.0, 10.0, 10.2]
     exp_name = isempty(plot_name) ? "bursting_neuron_regimes" : plot_name
 
-    tmax = num_T*Δt
     tseries = Vector{AbstractMatrix}()
     for μ in μₛ
         ds = bursting_neuron(u0=[-60.0, 0.0386, 0.0231], gₙₘ₀ₐ=μ)
-        ts = generate_trajectories(ds, tmax, transient_T; Δt, process_noise_level,PLOT=false, model_name="regimes")
+        ts = generate_trajectories(ds, T, transient_T; Δt, process_noise_level,PLOT=false, model_name="regimes")
 
         push!(tseries, ts)
         if SAVE
@@ -148,7 +144,7 @@ end
 
 
 """
-    ns_3d_benchmark(System::String, ; p_change=[linear, linear, linear], num_T=15000, ΔT=0.01, transient_T=2000, plot_title="", PLOT=true, SAVE=true)
+    ns_3d_benchmark(System::String, ; p_change=linear, T=150, Δt=0.01, transient_T=10, u0=nothing, process_noise_level=0.0, PLOT=true, plot_params=false, plot_name="", plot_title="", snapshots=false, SAVE=true, save_dir="", eval=false, eval_run=0)
 
 create a non-stationary benchmark system
 
@@ -181,18 +177,25 @@ System : Which system to create (String)
 
 Kwargs
 ------
-p_change : Vector containing the function by which the parameters should change, default [linear, linear, linear]\n
-num_T : number of timesteps, default 15000 (Int)\n
+p_change : Vector containing the function by which the parameters should change, default [linear, linear, linear]
 
-ΔT : time between steps, default 0.01 (Float)\n
+num_T : number of timesteps, default 15000 (Int)
 
-transient_T : timesteps used as start up to avoid transients, default 2000 (Int)\n
 
-PLOT : Specifies whether a plot is done, default true (BOOL)\n
+ΔT : time between steps, default 0.01 (Float)
 
-save_dir : directory to save the data in, default data/benchmarks (String)\n
 
-SAVE : Specifies whether the timeseries is saved or not, default true (BOOL)\n
+transient_T : timesteps used as start up to avoid transients, default 2000 (Int)
+
+
+PLOT : Specifies whether a plot is done, default true (BOOL)
+
+
+save_dir : directory to save the data in, default data/benchmarks (String)
+
+
+SAVE : Specifies whether the timeseries is saved or not, default true (BOOL)
+
 
 process_noise_level : The ratio of process noise, default 0 (Float)
 
@@ -202,33 +205,25 @@ Returns
 -------
 time series : Time series of the specified system (AbstractMatrix)
 """
-function ns_3d_benchmark(System::String, ; p_change=linear, num_T=15000, Δt=0.01, transient_T=100, plot_title="", PLOT=true, save_dir="", SAVE=true, process_noise_level=0.0, u0=nothing, snapshots=false, eval=false, eval_run=0, plot_params=false, plot_name="")
+function ns_3d_benchmark(System::String, ; p_change=linear, T=150, Δt=0.01, transient_T=10, u0=nothing, process_noise_level=0.0, PLOT=true, plot_params=false, plot_name="", plot_title="", snapshots=false, SAVE=true, save_dir="", eval=false, eval_run=0)
     @assert System in valid_ns_systems "$System is not a valid System: $valid_ns_systems"
     exp_name = isempty(plot_name) ? String(System) : plot_name
 
     u0 = u0 === nothing ? [0.4, 0.4, 0.8] : u0
     t₀ = 0.0
-    tmax = num_T * Δt
     if occursin("Paper", System)
-        t₀ = -600.0 - transient_T * Δt
-        tmax = 200.0
+        t₀ = -600.0
+        T = 800.0
     end
 
-
-    # do 2 runs to get the values for the process noise
-    if occursin("Paper", System)
-        ns_model = ns_systems_bench(System, p_change, tmax, u0=u0, transient_T=transient_T)
-        params = ns_model.params
-    else
-        ns_model, params = ns_benchmark_systems(System, p_change, tmax, u0=u0, t₀=t₀, transient_T=transient_T)
-    end
+    ns_model, params = ns_benchmark_systems(System, p_change, T; u0, t₀, transient_T)
 
     pl_params = plot_params ? params : []
-    tseries = generate_trajectories(ns_model, tmax, transient_T; Δt, t₀,process_noise_level, model_name=System, PLOT, plot_title, eval, eval_run, pl_params, save_name=exp_name)
+    tseries = generate_trajectories(ns_model, T, transient_T; Δt,process_noise_level, model_name=System, PLOT, plot_title, eval, eval_run, pl_params, save_name=exp_name)
 
     if snapshots
         μ₀ = [params[i](t₀ + transient_T) for i in axes(params, 1)]
-        μₑₙ₀ = [params[i](tmax + transient_T * Δt) for i in axes(params, 1)]
+        μₑₙ₀ = [params[i](T + transient_T) for i in axes(params, 1)]
         μₛ = [μ₀, μₑₙ₀]
         snap_series = Vector{AbstractMatrix}()
         for (i, μ) in enumerate(μₛ)
@@ -239,7 +234,7 @@ function ns_3d_benchmark(System::String, ; p_change=linear, num_T=15000, Δt=0.0
             else
                 throw("not implemented")
             end
-            push!(snap_series, generate_trajectories(ds, tmax, transient_T, Δt=Δt, PLOT=false, t₀=t₀, model_name=System))
+            push!(snap_series, generate_trajectories(ds, T, transient_T; Δt, process_noise_level=0.0, PLOT=false, model_name=System,STD=false))
         end
 
         comp_plots = plot3d(snap_series[1][:, 1], snap_series[1][:, 2], snap_series[1][:, 3], grid=true, xlabel="x", ylabel="y", zlabel="z", lc=:blue, title="Snapshot comparisons", label="Snapshot at t=0", linealpha=0.8)
@@ -264,7 +259,7 @@ end
 
 
 """
-    trial_benchmark(System::String, num_Trials::Int;seq_length=1000, ΔT=0.01, transient_T=2000, plot_title="",PLOT=true, save_dir="", SAVE=true, process_noise_level=0.0,lorenz_sys="")
+    trial_benchmark(System::String, num_Trials::Int; seq_T=10, Δt=0.01, transient_T=20, plot_title="", PLOT=true, save_dir="", SAVE=true, process_noise_level=0.0, lorenz_sys="")
 
 create a benchmark system in trial form
 
@@ -301,17 +296,17 @@ Returns
 -------
 time series : Time series of the specified system (AbstractMatrix)
 """
-function trial_benchmark(System::String, num_Trials::Int; seq_length=1000, Δt=0.01, transient_T=2000, plot_title="", PLOT=true, save_dir="", SAVE=true, process_noise_level=0.0, lorenz_sys="")
+function trial_benchmark(System::String, num_Trials::Int; seq_T=10, Δt=0.01, transient_T=20, plot_title="", PLOT=true, save_dir="", SAVE=true, process_noise_level=0.0, lorenz_sys="")
     @assert System in valid_trial_systems "$System not in valid_systems:$valid_trial_systems"
     @assert num_Trials > 10 "at least 10 trials need to be in the set"
 
     if System == "trial_lorenz"
-        ts = trial_ns_lorenz(num_Trials, seq_length, Δt, 22.0f0, 28.0f0;process_noise_level, transient_T)
+        ts = trial_ns_lorenz(num_Trials, seq_T, Δt, 22.0f0, 28.0f0;process_noise_level, transient_T)
     elseif System == "split_lorenz"
         valid_systems = ["ExplodingLorenz", "ShiftingLorenz", "ShrinkingLorenz", "PaperLorenzBigChange", "PaperLorenzSmallChange"]
         @assert lorenz_sys in valid_systems "$lorenz_sys is not a valid System: $valid_systems"
 
-        ts = split_lorenz_trials(lorenz_sys, num_Trials, seq_length, transient_T, Δt, process_noise_level=process_noise_level)
+        ts = split_lorenz_trials(lorenz_sys, num_Trials, seq_T, transient_T, Δt, process_noise_level=process_noise_level)
     end
 
     if PLOT
@@ -337,7 +332,7 @@ function trial_benchmark(System::String, num_Trials::Int; seq_length=1000, Δt=0
         dir_path = isempty(save_dir) ? "data/benchmarks/" : save_dir
         mkpath(dir_path)
         num_Trials = System == "trial_lorenz" ? num_Trials += 1 : num_Trials
-        ts = reshape(reduce(hcat, ts), num_Trials, seq_length + 1, 3)
+        ts = reshape(reduce(hcat, ts), num_Trials, seq_T + 1, 3)
         npzwrite("data/benchmarks/$System.npy", ts)
     end
 end

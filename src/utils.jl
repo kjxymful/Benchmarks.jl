@@ -1,4 +1,3 @@
-using Plots: plot, plot!
 using Plots
 
 function plot_param(params, time, Ttr,model_name)
@@ -17,7 +16,7 @@ end
     
 
 """
-    generate_trajectories(ds,tmax, transient_T;Δt=0.01, t₀=0.0, PLOT=true)
+    generate_trajectories(model, T, transient_T; Δt=0.01, process_noise_level=0.0, STD=true, save_name="", PLOT=true, plot_title="", pl_params=zeros(3), eval=false, eval_run=0, model_name="")::AbstractMatrix
 
 generate the trajectory of a given ns system
 
@@ -32,21 +31,21 @@ save_name : as what to save the file
 
 *Plotting to Figures/*
 """
-function generate_trajectories(model::GeneralizedDynamicalSystem, tmax, transient_T::Int; Δt=0.01, t₀=0.0, process_noise_level=0.0, STD=true, save_name="", PLOT=true, plot_title="", pl_params=zeros(3), eval=false, eval_run=0, model_name="")::AbstractMatrix
-    std_ = process_noise_level==0 ? [0,0,0] : std_model(model, tmax, transient_T;Δt,t₀)
-    ts = trajectory(model, tmax; Δt=Δt, Ttr=transient_T, diffeq=(alg=Tsit5(), callback=dynamical_noise_callback(process_noise_level, std_)))
+function generate_trajectories(model::GeneralizedDynamicalSystem, T::Real, transient_T::Real; Δt=0.01, process_noise_level=0.0, STD=true, save_name="", PLOT=true, plot_title="", pl_params=zeros(3), eval=false, eval_run=0, model_name="")::AbstractMatrix
+    std_ = process_noise_level==0 ? [0,0,0] : std_model(model, T, transient_T;Δt)
+    ts = trajectory(model, T; Δt, Ttr=transient_T, diffeq=(alg=Tsit5(), callback=dynamical_noise_callback(process_noise_level, std_)))
     u = Matrix(ts)
     u_std = StatsBase.standardize(ZScoreTransform, u, dims=1)
 
-    t = t₀:Δt:tmax
+    t = 0.0:Δt:T
     if PLOT
         if occursin("Paper", model_name)
-            uS0 = u_std[findall(x -> x <= 0, t), :]
-            uB0 = u_std[findall(x -> x > 0, t), :]
+            uS0 = u_std[findall(x -> x <= 600, t), :]
+            uB0 = u_std[findall(x -> x > 600, t), :]
             p = plot3d(uS0[:, 1], uS0[:, 2], uS0[:, 3],
                 grid=true,
-                lc=:red, label="t\$\\leq\$0", linealpha=1, title=plot_title)
-            plot3d!(p, uB0[:, 1], uB0[:, 2], uB0[:, 3], lc=:black, label="t>0", linealpha=0.8)
+                lc=:red, label="t\$\\leq\$0 (600)", linealpha=1, title=plot_title)
+            plot3d!(p, uB0[:, 1], uB0[:, 2], uB0[:, 3], lc=:black, label="t>0 (600)", linealpha=0.8)
         else
             p = plot3d(u_std[1:end, 1], u_std[1:end, 2], u_std[1:end, 3],
                 grid=true,
@@ -93,62 +92,6 @@ function exponential(start::Real, end_::Real, tmax::Real, x::Real; offset=0.0, �
 end
 
 
-"""
-uses DifferentialEquations
-"""
-function generate_trajectories(model::AbstractDynamicalSystem, tmax::AbstractFloat, skip_steps::Int; Δt=0.01, t₀=0.0, process_noise_level=0.0, STD=true,PLOT=true, plot_title="", eval=false, eval_run=0, save_name="", pl_params=[],model_name="")
-    tspan = (t₀, tmax)
-
-    prob = ODEProblem(model.sys, model.u0, tspan, model.params)
-    transient_T = skip_steps
-    std_ = process_noise_level==0 ? [0,0,0] : std_model(prob, tmax, transient_T;Δt,t₀)
-    sol = solve(prob, Tsit5(), callback=dynamical_noise_callback(process_noise_level,std_))
-
-    u = [sol(t) for t in (t₀+skip_steps*Δt):Δt:tmax]
-    u = permutedims(hcat(u...))
-    t = collect(t₀:0.01:(tmax-skip_steps*Δt))
-    u_std = StatsBase.standardize(ZScoreTransform, u, dims=1)
-
-    if PLOT
-        if occursin("Paper", model.name)
-            uS0 = u_std[findall(x -> x <= 0, t), :]
-            uB0 = u_std[findall(x -> x > 0, t), :]
-            p = plot3d(uB0[:, 1], uB0[:, 2], uB0[:, 3], lc=:black, label="t>0")
-            plot3d!(p,uS0[:, 1], uS0[:, 2], uS0[:, 3],
-                grid=true,
-                xlabel="x", ylabel="y", zlabel="z",
-                lc=:red, label="t\$\\leq\$0", linealpha=1, title=plot_title, legend=nothing)
-            
-        else
-            p = plot3d(u_std[1:end, 1], u_std[1:end, 2], u_std[1:end, 3],
-                grid=true,
-                xlabel="x", ylabel="y", zlabel="z",
-                lc=cgrad(:viridis), line_z=t[1:end],
-                colorbar_title=" \n \ntime",
-                right_margin=1.5Plots.mm, title=plot_title,legend=nothing)
-        end
-        if !isempty(pl_params)
-            p_par = plot_param(pl_params, t, 0, model_name)
-            l = grid(2,1, heights=[0.8,0.2])
-            p = plot(p, p_par, layout=l, plot_title=plot_title)
-        end
-        if eval
-            mkpath("Figures/eval_$(model.name)")
-            savefig(p, "Figures/eval_$(model.name)/$eval_run.png")
-        else
-            save_name = isempty(save_name) ? String(model.name) : save_name
-            mkpath("Figures/data/")
-            savefig(p, "Figures/data/$save_name.png")
-        end
-    end
-    if STD
-        return u_std
-    else
-        return u
-    end
-end
-
-
 function check_validity(sys::String)
     if !any(x->sys in x, [valid_ns_systems,valid_trial_systems, valid_std_systems,valid_regimes])
         throw("$benchmark_system is not a valid system")
@@ -165,15 +108,15 @@ function dynamical_noise_callback(dynamical_noise_level::AbstractFloat, std::Abs
     return cb
 end
 
-function std_model(ds::ContinuousDynamicalSystem,tmax, transient_T::Int; Δt=0.01, t₀=0.0)
-    tseries = Matrix(trajectory(ds, tmax, Ttr=transient_T,Δt=Δt, t0=t₀))
+function std_model(ds::ContinuousDynamicalSystem,T::Real, transient_T::Real; Δt=0.01)
+    tseries = Matrix(trajectory(ds, T, Ttr=transient_T,Δt=Δt))
     std_ = [std(tseries[:, i]) for i in axes(tseries, 2)]
     return std_
 end
 
-function std_model(ds::ODEProblem, tmax,transient_T;Δt=0.01,t₀=0.0)
-    cde = ContinuousDynamicalSystem(ds)
-    return std_model(cde, tmax,transient_T;Δt,t₀)
-end
+# function std_model(ds::ODEProblem, tmax,transient_T;Δt=0.01,t₀=0.0)
+#     cde = ContinuousDynamicalSystem(ds)
+#     return std_model(cde, tmax,transient_T;Δt,t₀)
+# end
 
 ϵ(process_noise::AbstractFloat)::AbstractFloat = randn() * process_noise
