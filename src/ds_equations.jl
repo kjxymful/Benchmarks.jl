@@ -1,5 +1,5 @@
 
-@inline @inbounds function loop_burstn!(du,u, p, t;process_noise=zeros(3))
+@inline @inbounds function loop_burstn!(du,u, p, t)
     I = p[1]::Real
     Cₘ = p[2]::Real
     gₗ = p[3]::Real
@@ -32,9 +32,9 @@
            -
            gₖ * n * (V - Eₖ) - gₘ * h * (V - Eₖ)
            -
-           gₙₘ₀ₐ * s∞(V) * (V - Eₙₘ₀ₐ)) / Cₘ + ϵ(process_noise[1])
-    du[2] = (n∞(V, Vₕₖ, kₖ) - n) / τₙ + ϵ(process_noise[2])
-    du[3] = (h∞(V, Vₕₘ, kₘ) - h) / τₕ + ϵ(process_noise[3])
+           gₙₘ₀ₐ * s∞(V) * (V - Eₙₘ₀ₐ)) / Cₘ 
+    du[2] = (n∞(V, Vₕₖ, kₖ) - n) / τₙ
+    du[3] = (h∞(V, Vₕₘ, kₘ) - h) / τₕ 
     return nothing
 
 end

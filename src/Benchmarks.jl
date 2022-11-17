@@ -1,6 +1,7 @@
 module Benchmarks
 
 using DynamicalSystems
+using DifferentialEquations: Tsit5, DiscreteCallback
 using Statistics
 using StatsBase
 

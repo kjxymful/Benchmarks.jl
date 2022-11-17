@@ -1,15 +1,4 @@
 
-abstract type AbstractDynamicalSystem end
-
-struct ds_sytem{V<:AbstractVector} <: AbstractDynamicalSystem
-    sys::Function
-    params::V
-    u0::V
-    name::String
-end
-
-
-
 """
 creates the bursting neuron model by Durstewitz 2009
 as ContinuousDynamicalSystem

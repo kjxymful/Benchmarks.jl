@@ -1,16 +1,3 @@
-
-"""
-an object defining the pre chosen ns systems
-
-params need to be funtions f(t)
-"""
-struct ns_systems{V<:AbstractVector,Vf<:AbstractVector} <: AbstractDynamicalSystem
-    sys::Function
-    params::Vf
-    u0::V
-    name::String
-end
-
 """
 choose and initialize the given ns system
 

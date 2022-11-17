@@ -165,8 +165,8 @@ function parse_commandline(;path="")
 
         "--interactive_noise"
         help="adds process noise as slider"
-        arg_type = Float32
-        default = defaults["interactive_noise"] |> Float32
+        arg_type = Bool
+        default = defaults["interactive_noise"] |> Bool
     end
     return parse_args(settings)
 end

@@ -16,5 +16,5 @@
     "plot_params" : true,
     "exp_name" : "",
     "interactive":false,
-    "interactive_noise":0.0
+    "interactive_noise":false
 }

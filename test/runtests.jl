@@ -22,16 +22,16 @@ end
     append!(all_sys, valid_ns_systems)
     append!(all_sys, valid_regimes)
 
-    num_T = args["num_T"]
+    T = args["T"]
     transient_T = args["transient_T"]
     for sys in all_sys
         args["name"] = sys
         @show sys
         if occursin("BN", sys) || occursin("bursting", sys)
-            args["num_T"] = num_T * 10
+            args["T"] = T * 10
             args["transient_T"] = transient_T * 10
         else
-            args["num_T"] = num_T
+            args["T"] = T
             args["transient_T"] = transient_T
         end
         generate_benchmarks(args)
@@ -49,16 +49,16 @@ end
     append!(all_sys, valid_ns_systems)
     append!(all_sys, valid_regimes)
 
-    num_T = args["num_T"]
+    T = args["T"]
     transient_T = args["transient_T"]
     for sys in all_sys
         args["name"] = sys
         @show sys
         if occursin("BN", sys) || occursin("bursting", sys)
-            args["num_T"] = num_T * 10
+            args["T"] = T * 10
             args["transient_T"] = transient_T * 10
         else
-            args["num_T"] = num_T
+            args["T"] = T
             args["transient_T"] = transient_T
         end
         generate_benchmarks(args)
@@ -74,7 +74,7 @@ end
     append!(all_sys, valid_ns_systems)
     append!(all_sys, valid_regimes)
 
-    num_T = args["num_T"]
+    T = args["T"]
     transient_T = args["transient_T"]
     for sys in valid_trial_systems
         args["name"] = sys
