@@ -36,9 +36,6 @@ end
         end
         generate_benchmarks(args)
     end
-    wait_for_key()
-    rm("Figures/")
-    rm("data/")
 end
 
 @testset "Dynamical Noise" begin
@@ -63,9 +60,8 @@ end
         end
         generate_benchmarks(args)
     end
-    wait_for_key()
-    rm("Figures/")
-    rm("data/")
+    rm("Figures/", recursive=true)
+    rm("data/", recursive=true)
 end
 @testset "Trials" begin
     args = parse_commandline()
@@ -80,6 +76,6 @@ end
         args["name"] = sys
         generate_benchmarks(args)
     end
-    rm("Figures/")
-    rm("data/")
+    rm("Figures/", recursive=true)
+    rm("data/", recursive=true)
 end

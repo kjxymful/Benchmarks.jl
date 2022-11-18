@@ -332,7 +332,7 @@ function trial_benchmark(System::String, num_Trials::Int; seq_T=10, Δt=0.01, tr
         dir_path = isempty(save_dir) ? "data/benchmarks/" : save_dir
         mkpath(dir_path)
         num_Trials = System == "trial_lorenz" ? num_Trials += 1 : num_Trials
-        ts = reshape(reduce(hcat, ts), num_Trials, seq_T + 1, 3)
+        ts = reshape(reduce(hcat, ts), num_Trials, Int(seq_T÷Δt)  + 1, 3)
         npzwrite("data/benchmarks/$System.npy", ts)
     end
 end
