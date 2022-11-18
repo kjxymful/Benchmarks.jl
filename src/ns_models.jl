@@ -1,4 +1,3 @@
-using DynamicalSystems
 """
 choose and initialize the given ns system
 

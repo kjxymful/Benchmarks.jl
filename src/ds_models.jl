@@ -1,4 +1,3 @@
-using DynamicalSystems
 """
 creates the bursting neuron model by Durstewitz 2009
 as ContinuousDynamicalSystem

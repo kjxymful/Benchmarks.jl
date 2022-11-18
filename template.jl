@@ -1,5 +1,5 @@
 using Benchmarks 
-using DynamicalSystems
+using DynamicalSystemsBase
 using Plots
 using Statistics
 

@@ -14,7 +14,5 @@
     "lorenz_trial_sys" : "ShiftingLorenz",
     "snapshots" : true,
     "plot_params" : true,
-    "exp_name" : "",
-    "interactive":false,
-    "interactive_noise":false
+    "exp_name" : ""
 }

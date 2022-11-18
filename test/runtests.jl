@@ -28,8 +28,8 @@ end
         args["name"] = sys
         @show sys
         if occursin("BN", sys) || occursin("bursting", sys)
-            args["T"] = T * 10
-            args["transient_T"] = transient_T * 10
+            args["T"] = 150000
+            args["transient_T"] = 500
         else
             args["T"] = T
             args["transient_T"] = transient_T
@@ -53,7 +53,7 @@ end
         @show sys
         if occursin("BN", sys) || occursin("bursting", sys)
             args["T"] = T * 10
-            args["transient_T"] = transient_T * 10
+            args["transient_T"] = 500
         else
             args["T"] = T
             args["transient_T"] = transient_T

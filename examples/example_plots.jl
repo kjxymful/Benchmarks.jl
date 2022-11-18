@@ -1,5 +1,5 @@
 using Benchmarks
-using DynamicalSystems
+using DynamicalSystemsBase
 using Plots
 
 sys, params = ns_benchmark_systems("ShrinkingLorenz", linear, 150.0f0, zeros(3), transient_T=50)

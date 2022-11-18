@@ -157,16 +157,6 @@ function parse_commandline(;path="")
         help = "name as which to save the plot"
         arg_type = String
         default = defaults["exp_name"] |> String
-        
-        "--interactive"
-        help="starts the interactive exploration framework"
-        arg_type = Bool
-        default = defaults["interactive"] |> Bool
-
-        "--interactive_noise"
-        help="adds process noise as slider"
-        arg_type = Bool
-        default = defaults["interactive_noise"] |> Bool
     end
     return parse_args(settings)
 end

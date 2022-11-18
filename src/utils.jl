@@ -1,5 +1,4 @@
 using Plots
-using DynamicalSystems
 using DifferentialEquations: Tsit5, DiscreteCallback
 
 function plot_param(params, time, Ttr,model_name)

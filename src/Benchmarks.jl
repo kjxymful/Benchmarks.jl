@@ -2,6 +2,7 @@ module Benchmarks
 
 using Statistics
 using StatsBase
+using DynamicalSystemsBase
 
 using Reexport
 
@@ -28,8 +29,5 @@ include("data_gen.jl")
 
 include("parsing.jl")
 export parse_commandline, generate_benchmarks
-
-include("InteractiveBenchmarks/InteractiveBenchmarks.jl")
-@reexport using .InteractiveBenchmarks
 
 end
