@@ -24,7 +24,7 @@ function generate_benchmarks(args::Dict{String,Any})
     T_BN = 1500
     T_L = 150
     dt_BN = 0.05
-    dt_L = 0.05
+    dt_L = 0.01
     Ttr_BN = 500
     Ttr_L = 20
 
