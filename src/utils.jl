@@ -9,6 +9,14 @@ TP_dict = Dict("StopBurstBN" => 10.0,
                 "ExplodingLorenz"=>24,
                 "PaperLorenzBigChange"=>166,
                 "PaperLorenzSmallChange"=>166)
+TP_loc = Dict("StopBurstBN" => 25001, 
+                "RampUpBN"=>9001, 
+                "ShrinkingLorenz"=>25386, 
+                "ShiftingLorenz"=>25386, 
+                "ExplodingLorenz"=>2501,
+                "PaperLorenzBigChange"=>67056,
+                "PaperLorenzSmallChange"=>166)
+
 
 function plot_param(params, time, Ttr,model_name,TP)
     time1 = time .+ Ttr
@@ -16,16 +24,24 @@ function plot_param(params, time, Ttr,model_name,TP)
         p = plot(time, params[1].(time1)/params[1](time1[1]), label="σ₀=$(round(params[1](time1[1]),digits=1))", legend=:inside, ylabel="% of IC")
         plot!(time, params[2].(time1)/params[2](time1[1]), label="ρ₀=$(round(params[2](time1[1]),digits=1))")
         plot!(time, params[3].(time1)/params[3](time1[1]), label="β₀=$(round(params[3](time1[1]),digits=1))")
+        μ = params[2]
     elseif occursin("BN",model_name)
         p = plot(time, params[1].(time1)/params[1](time1[1]), label="gₙₘ₀ₐ₀=$(round(params[1](time1[1]),digits=1))",legend=:inside, ylabel="% of IC")
+        μ = params[1]
     else
         throw("No parameter specifices for this model implemented")
     end
     if TP
         TP_val = TP_dict[model_name]
         # add a vertical line at time where params[1] equals TP_val
-        TP_loc = findfirst(x->x==TP_val, params[1].(time1))
-        vline!(p,[time[findfirst(x->x>=TP_val,params[1].(time1))]], label="TP at :$(Int(round(TP_loc,digits=1)))")
+        if μ(0) > μ(10)
+            TP_location = findfirst(x->x<=TP_val, μ.(time1))
+        elseif μ(0) < μ(10)
+            TP_location = findfirst(x->x>=TP_val, μ.(time1))
+        else
+            throw("Something is weird") 
+        end           
+        vline!(p,[time[TP_location]], label="TP at :$(Int(round(TP_location,digits=1)))")
     end    
     return p
 end

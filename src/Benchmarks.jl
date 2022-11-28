@@ -18,7 +18,7 @@ include("ns_models.jl")
 export ns_benchmark_systems, ns_systems_bench, ns_systems
 
 include("utils.jl")
-export generate_trajectories, linear, sigmoid, exponential
+export generate_trajectories, linear, sigmoid, exponential, TP_loc
 
 include("trial_ns.jl")
 export trial_ns_lorenz, split_lorenz_trials
