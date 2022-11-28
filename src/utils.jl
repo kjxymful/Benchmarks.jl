@@ -1,7 +1,16 @@
 using Plots
 using DifferentialEquations: Tsit5, DiscreteCallback
 
-function plot_param(params, time, Ttr,model_name)
+# adjust the correct tipping points
+TP_dict = Dict("StopBurstBN" => 10.0, 
+                "RampUpBN"=>2.6, 
+                "ShrinkingLorenz"=>24, 
+                "ShiftingLorenz"=>24, 
+                "ExplodingLorenz"=>24,
+                "PaperLorenzBigChange"=>166,
+                "PaperLorenzSmallChange"=>166)
+
+function plot_param(params, time, Ttr,model_name,TP)
     time1 = time .+ Ttr
     if occursin("Lorenz",model_name)
         p = plot(time, params[1].(time1)/params[1](time1[1]), label="σ₀=$(round(params[1](time1[1]),digits=1))", legend=:inside, ylabel="% of IC")
@@ -12,6 +21,12 @@ function plot_param(params, time, Ttr,model_name)
     else
         throw("No parameter specifices for this model implemented")
     end
+    if TP
+        TP_val = TP_dict[model_name]
+        # add a vertical line at time where params[1] equals TP_val
+        TP_loc = findfirst(x->x==TP_val, params[1].(time1))
+        vline!(p,[time[findfirst(x->x>=TP_val,params[1].(time1))]], label="TP at :$(Int(round(TP_loc,digits=1)))")
+    end    
     return p
 end
     
@@ -32,7 +47,7 @@ save_name : as what to save the file
 
 *Plotting to Figures/*
 """
-function generate_trajectories(model::GeneralizedDynamicalSystem, T::Real, transient_T::Real; Δt=0.01, process_noise_level=0.0, STD=true, save_name="", PLOT=true, plot_title="", pl_params=zeros(3), eval=false, eval_run=0, model_name="")::AbstractMatrix
+function generate_trajectories(model::GeneralizedDynamicalSystem, T::Real, transient_T::Real; Δt=0.01, process_noise_level=0.0, STD=true, save_name="", PLOT=true, plot_title="", pl_params=zeros(3), eval=false, eval_run=0, model_name="",TP=false)::AbstractMatrix
     std_ = process_noise_level==0 ? [0,0,0] : std_model(model, T, transient_T;Δt)
     ts = trajectory(model, T; Δt, Ttr=transient_T, diffeq=(alg=Tsit5(), callback=dynamical_noise_callback(process_noise_level, std_)))
     u = Matrix(ts)
@@ -54,14 +69,14 @@ function generate_trajectories(model::GeneralizedDynamicalSystem, T::Real, trans
                 colorbar_title=" \n \ntime",
                 right_margin=1.5Plots.mm, title=plot_title,label=nothing)
         end
-        if !isempty(pl_params)
-            p_par = plot_param(pl_params, t, transient_T, model_name)
+        if pl_params != zeros(3)
+            p_par = plot_param(pl_params, t, transient_T, model_name,TP)
             l = grid(2,1, heights=[0.8,0.2])
             p = plot(p, p_par, layout=l, plot_title=plot_title)
         end
         if eval
             mkpath("Figures/eval_$(model_name)")
-            savefig(p, "Figures/eval_$(model_name)/$eval_run.png")
+            savefig(p, "Figures/eval_$(model_name)/$save_name $eval_run.png")
         else
             save_name = isempty(save_name) ? model_name : save_name
             mkpath("Figures/data/")
