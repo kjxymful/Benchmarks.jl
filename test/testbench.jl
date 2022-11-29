@@ -34,8 +34,9 @@ using Benchmarks
 #     ts = generate_trajectories(model, 150, 50; Δt=0.01, process_noise_level=0.0, STD=true, save_name="Lorenz_$(ρ)", PLOT=true, plot_title="Lorenz, ρ=$(ρ)", eval=true, eval_run=0, model_name="Lorenz")
 # end
 
-t₀ = -600.0
-T = 800.0
-model_name = "PaperLorenzSmallChange"
-model, params = ns_benchmark_systems(model_name, linear, T, transient_T=50;t₀)
-ts = generate_trajectories(model, T, 20; Δt=0.01, process_noise_level=0.0, STD=true, save_name="BN_test", PLOT=true, plot_title="BN", eval=true, eval_run=0, model_name=model_name, pl_params =params,TP=true)
+t₀ = 0.0
+T = 1500.0
+transient_T = 500
+model_name = "RampUpBN"
+model, params = ns_benchmark_systems(model_name, linear, T;t₀, transient_T)
+ts = generate_trajectories(model, T, transient_T; Δt=0.05, process_noise_level=0.0, STD=true, save_name="BN_test", PLOT=true, plot_title="BN", eval=true, eval_run=0, model_name=model_name, pl_params =params,TP=true)

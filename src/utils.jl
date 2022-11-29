@@ -11,11 +11,11 @@ TP_dict = Dict("StopBurstBN" => 10.0,
                 "PaperLorenzSmallChange"=>166)
 TP_loc = Dict("StopBurstBN" => 25001, 
                 "RampUpBN"=>9001, 
-                "ShrinkingLorenz"=>25386, 
-                "ShiftingLorenz"=>25386, 
-                "ExplodingLorenz"=>2501,
-                "PaperLorenzBigChange"=>67056,
-                "PaperLorenzSmallChange"=>166)
+                "ShrinkingLorenz"=>12694, 
+                "ShiftingLorenz"=>12694, 
+                "ExplodingLorenz"=>1251,
+                "PaperLorenzBigChange"=>64056,
+                "PaperLorenzSmallChange"=>76096)
 
 
 function plot_param(params, time, Ttr,model_name,TP)
@@ -41,6 +41,7 @@ function plot_param(params, time, Ttr,model_name,TP)
         else
             throw("Something is weird") 
         end           
+        @show μ.(time1)[1], μ.(time1)[end], TP_location
         vline!(p,[time[TP_location]], label="TP at :$(Int(round(TP_location,digits=1)))")
     end    
     return p

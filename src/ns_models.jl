@@ -67,7 +67,7 @@ function ns_benchmark_systems(sys::String, par_fun::Function, T::Real; u0=[0.4,0
         final_params = [g_final]  
     end
     if !occursin("Paper",sys)
-        params = [t -> par_fun(init_params[i], final_params[i], tmax, t-transient_T) for i in axes(init_params, 1)]
+        params = [t -> par_fun(init_params[i], final_params[i], tmax, t-t_shift) for i in axes(init_params, 1)]
     end
     return ContinuousDynamicalSystem(sys_fun, u0, params), params
 end
