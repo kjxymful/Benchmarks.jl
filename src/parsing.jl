@@ -2,7 +2,7 @@ using JSON
 using ArgParse
 
 
-function generate_benchmarks(args::Dict{String,Any})
+function generate_benchmarks(args::Dict{String,Any};u0=nothing)
 
     benchmark_system = args["name"]::String
     process_noise_level = args["process_noise_level"]::AbstractFloat
@@ -55,7 +55,7 @@ function generate_benchmarks(args::Dict{String,Any})
         ns_3d_benchmark(benchmark_system; p_change, T, Δt,transient_T,
             plot_title, PLOT, save_dir, SAVE,
             process_noise_level, snapshots,
-            plot_params, plot_name)
+            plot_params, plot_name,u0)
     elseif benchmark_system in valid_trial_systems
         trial_benchmark("split_lorenz", num_trials; seq_T=T, Δt, transient_T,
             plot_title, PLOT, save_dir, SAVE,
