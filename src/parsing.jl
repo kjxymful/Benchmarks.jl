@@ -34,11 +34,13 @@ function generate_benchmarks(args::Dict{String,Any};u0=nothing)
             Δt = dt_BN
             transient_T = Ttr_BN
         end
-    else
-        msg = "Systems can look very differently. Default values are:\n"
-        msg= msg*"-"^50*"\nLorenz:\n"*"  T=$T_L,Δt=$dt_L,transient_T=$Ttr_L \n"*"-"^50*"\nBurstingNeuron:\n"*"  T=$T_BN,Δt=$dt_BN,transient_T=$Ttr_BN"        
+    else     
+        if occursin("BN", benchmark_system)
+            T_L = T_BN
+            dt_L= dt_BN
+            Ttr_T = Ttr_BN
+        end
         @warn "You are not using the default values: T=$T_L,Δt=$dt_L,transient_T=$Ttr_L. Used values are:", [T,Δt,transient_T]
-        println(msg)
     end
 
 
