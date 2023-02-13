@@ -144,7 +144,7 @@ end
 
 
 """
-    ns_3d_benchmark(System::String, ; p_change=linear, T=150, Δt=0.01, transient_T=10, u0=nothing, process_noise_level=0.0, PLOT=true, plot_params=false, plot_name="", plot_title="", snapshots=false, SAVE=true, save_dir="", eval=false, eval_run=0)
+    ns_3d_benchmark(System::String, ; p_change=linear, T=150, Δt=0.01, transient_T=10, u0=nothing, process_noise_level=0.0, PLOT=true, plot_params=false, plot_name="", plot_title="", snapshots=false, SAVE=true, save_dir="", eval=false, eval_run=0,STD=false)
 
 create a non-stationary benchmark system
 
@@ -205,7 +205,7 @@ Returns
 -------
 time series : Time series of the specified system (AbstractMatrix)
 """
-function ns_3d_benchmark(System::String, ; p_change=linear, T=150, Δt=0.01, transient_T=10, u0=nothing, process_noise_level=0.0, PLOT=true, plot_params=false, plot_name="", plot_title="", snapshots=false, SAVE=true, save_dir="", eval=false, eval_run=0)
+function ns_3d_benchmark(System::String, ; p_change=linear, T=150, Δt=0.01, transient_T=10, u0=nothing, process_noise_level=0.0, PLOT=true, plot_params=false, plot_name="", plot_title="", snapshots=false, SAVE=true, save_dir="", eval=false, eval_run=0,STD=false)
     @assert System in valid_ns_systems "$System is not a valid System: $valid_ns_systems"
     exp_name = isempty(plot_name) ? String(System) : plot_name
 
@@ -219,7 +219,7 @@ function ns_3d_benchmark(System::String, ; p_change=linear, T=150, Δt=0.01, tra
     ns_model, params = ns_benchmark_systems(System, p_change, T; u0, t₀, transient_T)
 
     pl_params = plot_params ? params : []
-    tseries = generate_trajectories(ns_model, T, transient_T; Δt,process_noise_level, model_name=System, PLOT, plot_title, eval, eval_run, pl_params, save_name=exp_name)
+    tseries = generate_trajectories(ns_model, T, transient_T; Δt,process_noise_level, model_name=System, PLOT, plot_title, eval, eval_run, pl_params, save_name=exp_name,STD)
 
     if snapshots
         μ₀ = [params[i](t₀ + transient_T) for i in axes(params, 1)]

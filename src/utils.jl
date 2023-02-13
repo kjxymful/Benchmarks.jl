@@ -124,6 +124,19 @@ function exponential(start::Real, end_::Real, tmax::Real, x::Real; offset=0.0, �
     return offset + start * exp(x / τ)
 end
 
+function complicated(start::Real, end_::Real, tmax::Real, x::Real)
+    e_val = end_ - start
+    return (abs(x / tmax * cos(x * 2 * pi / tmax))) * e_val + start
+end
+
+function complicated_lorenz(start::Real, end_::Real, tmax::Real, x::Real; offset=0.0, τ=0.0)
+    s_val = offset == 0 ? start : offset
+    e_val = τ == 0 ? end_ : exponential(start, end_, tmax, 200; offset=offset, τ=τ)
+    bump(x) = (x+600)/800
+    e_val = e_val - bump(800) - s_val
+    return (abs((x+600)/800*sin(x*2*pi/800)))*e_val+bump(x)+ s_val
+end
+
 
 function check_validity(sys::String)
     if !any(x->sys in x, [valid_ns_systems,valid_trial_systems, valid_std_systems,valid_regimes])
@@ -147,9 +160,75 @@ function std_model(ds::ContinuousDynamicalSystem,T::Real, transient_T::Real; Δt
     return std_
 end
 
-# function std_model(ds::ODEProblem, tmax,transient_T;Δt=0.01,t₀=0.0)
-#     cde = ContinuousDynamicalSystem(ds)
-#     return std_model(cde, tmax,transient_T;Δt,t₀)
-# end
-
 ϵ(process_noise::AbstractFloat)::AbstractFloat = randn() * process_noise
+
+"""
+Snapshot generator for Paper Lorenz systems
+"""
+function lorenz_at_t(T::AbstractFloat;p_fun="", STD=true)
+    ρ₀ = 154
+    ρ₁ = 8
+    τ = 100
+    t₀ = -600
+    Δt = 0.01
+    tmax = 200
+    time = -600:0.01:200
+    T = time[Int(T*80000)+1]
+    p_fun = isempty(p_fun) ? "exponential" : p_fun
+    p_sym = Symbol(p_fun)
+    p_change = @eval $p_sym
+    ρ(t) = p_change(ρ₁,0,0,t,offset=ρ₀,τ=τ)
+    ρ = ρ(T)
+    ds = lorenz(;ρ)
+    ts = Matrix(trajectory(ds, 800,Ttr=20))
+    if STD
+        ns_sys,_ = ns_benchmark_systems("PaperLorenzBigChange", p_change, tmax; t₀, transient_T=20)
+        nsts = generate_trajectories(ns_sys, 800, 20, PLOT=false, STD=false)
+        std_ = std(nsts, dims=1)
+        mean_ = mean(nsts,dims=1)
+        for i in 1:3
+            global ts[:,i] = standardize_to_nsseries(ts[:,i], mean_[i], std_[i])
+        end
+    end
+    return ts
+end
+    
+
+"""
+Snapshot generator for StopBurstBN
+"""
+function BN_at_t(T::AbstractFloat;p_fun="",STD=true,pn=false)
+    g_init = 9.25
+    g_final = 10.15
+    tmax = 1500
+    Δt = 0.05
+    time = 0:Δt:tmax
+    t_id = Int(T*tmax/0.05)+1
+    T = time[t_id]
+    p_fun = isempty(p_fun) ? "linear" : p_fun
+    p_sym = Symbol(p_fun)
+    p_change = @eval $p_sym
+    ns_sys,_ = ns_benchmark_systems("StopBurstBN", p_change, tmax; transient_T=500)
+    nsts = generate_trajectories(ns_sys, 800, 20, PLOT=false, STD=false, Δt=Δt)
+    g(t) = p_change(g_init, g_final, tmax, t)
+    gₙₘ₀ₐ = g(T)
+    ds = bursting_neuron(;gₙₘ₀ₐ)
+    kwargs = ()
+    if pn
+        kwargs = (diffeq=(alg=Tsit5(), callback=dynamical_noise_callback(0.05, std(nsts,dims=1))))
+    end
+    ts = Matrix(trajectory(ds, tmax; Ttr=500, Δt, kwargs...))
+    if STD
+        std_ = std(nsts,dims=1)
+        mean_ = mean(nsts,dims=1)
+        for i in 1:3
+            ts[:,i] = standardize_to_nsseries(ts[:,i], mean_[i], std_[i])
+        end
+    end
+    return ts
+end
+
+function standardize_to_nsseries(u::AbstractVector, mean::AbstractFloat, std::AbstractFloat)
+    return (u .- mean) ./ std
+end
+

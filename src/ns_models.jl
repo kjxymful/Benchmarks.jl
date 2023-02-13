@@ -40,14 +40,14 @@ function ns_benchmark_systems(sys::String, par_fun::Function, T::Real; u0=[0.4,0
             ρ₀ = 154
             ρ₁ = 8
             τ = 100
-            params = [t->linear(σ_init,σ_final,tmax,t-t_shift),t -> exponential(ρ₁,0,0,t-t_shift,offset=ρ₀,τ=τ), t->linear(β_init,β_final,tmax,t-t_shift)]
+            params = [t->linear(σ_init,σ_final,tmax,t-t_shift),t -> par_fun(ρ₁,0,0,t-t_shift,offset=ρ₀,τ=τ), t->linear(β_init,β_final,tmax,t-t_shift)]
         elseif sys == "PaperLorenzSmallChange"
             σ_final = σ_init
             β_final = β_init
             ρ₀ = 165.5
             ρ₁ = 0.1
             τ = 100
-            params = [t->linear(σ_init,σ_final,tmax,t-t_shift),t -> exponential(ρ₁,0,0,t-t_shift,offset=ρ₀,τ=τ), t->linear(β_init,β_final,tmax,t-t_shift)]
+            params = [t->linear(σ_init,σ_final,tmax,t-t_shift),t -> par_fun(ρ₁,0,0,t-t_shift,offset=ρ₀,τ=τ), t->linear(β_init,β_final,tmax,t-t_shift)]
         end
         if !occursin("Paper", sys)
             init_params = [σ_init, ρ_init, β_init]
