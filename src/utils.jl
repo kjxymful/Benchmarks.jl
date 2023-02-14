@@ -72,7 +72,7 @@ function generate_trajectories(model::GeneralizedDynamicalSystem, T::Real, trans
 
     t = 0.0:Δt:T
     if PLOT
-        if occursin("Paper", model_name)
+        if occursin("Paper", model_name) && !occursin("complicated", save_name)
             uS0 = u_std[findall(x -> x <= 600, t), :]
             uB0 = u_std[findall(x -> x > 600, t), :]
             p = plot3d(uS0[:, 1], uS0[:, 2], uS0[:, 3],

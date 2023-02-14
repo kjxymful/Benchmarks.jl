@@ -2,7 +2,7 @@ module Benchmarks
 
 using Statistics
 using StatsBase
-using DynamicalSystemsBase
+using DynamicalSystems
 
 const valid_std_systems = ["standard_bursting", "standard_lorenz", "bursting_limit_cycle", "lorenz_limit_cycle"]
 const valid_ns_systems = ["RampUpBN", "StopBurstBN", "ExplodingLorenz", "ShiftingLorenz", "ShrinkingLorenz", "PaperLorenzBigChange", "PaperLorenzSmallChange"]
