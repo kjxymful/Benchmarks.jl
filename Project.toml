@@ -18,6 +18,8 @@ UnicodePlots = "b8865327-cd53-5732-bb35-84acbb429228"
 
 [compat]
 DynamicalSystems = "2.3.0"
+Plots = "1"
+DifferentialEquations = "7.6.0"
 julia = "1"
 
 [extras]
