@@ -64,7 +64,7 @@ save_name : as what to save the file
 
 *Plotting to Figures/*
 """
-function generate_trajectories(model::GeneralizedDynamicalSystem, T::Real, transient_T::Real; Δt=0.01, process_noise_level=0.0, STD=true, save_name="", PLOT=true, plot_title="", pl_params=zeros(3), eval=false, eval_run=0, model_name="",TP=false)::AbstractMatrix
+function generate_trajectories(model::ContinuousDynamicalSystem, T::Real, transient_T::Real; Δt=0.01, process_noise_level=0.0, STD=true, save_name="", PLOT=true, plot_title="", pl_params=zeros(3), eval=false, eval_run=0, model_name="",TP=false)::AbstractMatrix
     std_ = process_noise_level==0 ? [0,0,0] : std_model(model, T, transient_T;Δt)
     ts = trajectory(model, T; Δt, Ttr=transient_T, diffeq=(alg=Tsit5(), callback=dynamical_noise_callback(process_noise_level, std_)))
     u = Matrix(ts)
