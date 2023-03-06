@@ -197,9 +197,13 @@ end
 """
 Snapshot generator for StopBurstBN
 """
-function BN_at_t(T::AbstractFloat;p_fun="",STD=true,pn=false)
+function BN_at_t(T::AbstractFloat;p_fun="",STD=true,pn=false,sys="StopBurstBN")
     g_init = 9.25
     g_final = 10.15
+    if sys == "RampUpBN"
+        g_init = 8.2
+        g_final = 8.8
+    end
     tmax = 1500
     Δt = 0.05
     time = 0:Δt:tmax
@@ -208,7 +212,7 @@ function BN_at_t(T::AbstractFloat;p_fun="",STD=true,pn=false)
     p_fun = isempty(p_fun) ? "linear" : p_fun
     p_sym = Symbol(p_fun)
     p_change = @eval $p_sym
-    ns_sys,_ = ns_benchmark_systems("StopBurstBN", p_change, tmax; transient_T=500)
+    ns_sys,_ = ns_benchmark_systems(sys, p_change, tmax; transient_T=500)
     nsts = generate_trajectories(ns_sys, 800, 20, PLOT=false, STD=false, Δt=Δt)
     g(t) = p_change(g_init, g_final, tmax, t)
     gₙₘ₀ₐ = g(T)

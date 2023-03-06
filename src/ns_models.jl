@@ -60,8 +60,8 @@ function ns_benchmark_systems(sys::String, par_fun::Function, T::Real; u0=[0.4,0
             g_init = 9.25
             g_final = 10.15
         elseif sys == "RampUpBN"
-            g_init = 2
-            g_final = 4
+            g_init = 8.2
+            g_final = 8.8
         end
         init_params = [g_init]
         final_params = [g_final]  
