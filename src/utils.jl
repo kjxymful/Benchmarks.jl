@@ -140,7 +140,7 @@ end
 
 function check_validity(sys::String)
     if !any(x->sys in x, [valid_ns_systems,valid_trial_systems, valid_std_systems,valid_regimes])
-        throw("$benchmark_system is not a valid system")
+        throw("$sys is not a valid system")
     end
     return true
 end
