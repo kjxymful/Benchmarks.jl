@@ -62,6 +62,12 @@ function ns_benchmark_systems(sys::String, par_fun::Function, T::Real; u0=[0.4,0
         elseif sys == "RampUpBN"
             g_init = 8.2
             g_final = 8.8
+        elseif sys == "EasyBN"
+            g_init = 3
+            g_final = 4.5
+        elseif sys == "SimpleRampBN"
+            g_init = 7.0
+            g_final = 8.8
         end
         init_params = [g_init]
         final_params = [g_final]  

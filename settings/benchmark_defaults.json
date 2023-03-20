@@ -1,12 +1,12 @@
 {
-    "name": "PaperLorenzBigChange",
-    "exp_name": "",
+    "name": "RampUpBN",
+    "exp_name": "RUBN",
     
     "process_noise_level" : 0.0,
     "T" : 150,
     "delta_T" : 0.01,
     "transient_T" : 20,
-    "p_change": "",
+    "p_change": "linear",
     "STD":true,
     
     "PLOT" : true,

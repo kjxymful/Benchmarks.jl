@@ -203,6 +203,12 @@ function BN_at_t(T::AbstractFloat;p_fun="",STD=true,pn=false,sys="StopBurstBN")
     if sys == "RampUpBN"
         g_init = 8.2
         g_final = 8.8
+    elseif sys == "EasyBN"
+        g_init = 3
+        g_final = 4.5
+    elseif sys == "SimpleRampBN"
+        g_init = 7.0
+        g_final = 8.8
     end
     tmax = 1500
     Δt = 0.05

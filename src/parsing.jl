@@ -61,6 +61,7 @@ function generate_benchmarks(args::Dict{String,Any}; u0=nothing)
             end
         end
         p_change = @eval $p_sym
+        @show T, Δt, transient_T
         ns_3d_benchmark(benchmark_system; p_change, T, Δt, transient_T,
             plot_title, PLOT, save_dir, SAVE,
             process_noise_level, snapshots,
