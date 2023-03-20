@@ -56,6 +56,14 @@ end
     return nothing
 end
 
+@inline @inbounds function ns_roessler!(du, u, p, t; process_noise=zeros(3))
+    a, b, c = p
+    du[1] =  -u[2] - u[3] 
+    du[2] = u[1] + a(t)* u[2] 
+    du[3] = b(t)+ u[3] * (u[1] - c(t) )
+    return nothing
+end
+
 @inline @inbounds function ns_bursting_neuron!(du,u, p, t)
     I = 0
     Cₘ = 6

@@ -5,7 +5,7 @@ using StatsBase
 using DynamicalSystems
 
 const valid_std_systems = ["standard_bursting", "standard_lorenz", "bursting_limit_cycle", "lorenz_limit_cycle"]
-const valid_ns_systems = ["RampUpBN", "StopBurstBN", "ExplodingLorenz", "ShiftingLorenz", "ShrinkingLorenz", "PaperLorenzBigChange", "PaperLorenzSmallChange"]
+const valid_ns_systems = ["Roessler","EasyBN", "SimpleRampBN","RampUpBN", "StopBurstBN", "ExplodingLorenz", "ShiftingLorenz", "ShrinkingLorenz", "PaperLorenzBigChange", "PaperLorenzSmallChange"]
 const valid_trial_systems = ["trial_lorenz", "split_lorenz"]
 const valid_regimes = ["bursting_neuron_regimes"]
 

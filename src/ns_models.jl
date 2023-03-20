@@ -71,6 +71,10 @@ function ns_benchmark_systems(sys::String, par_fun::Function, T::Real; u0=[0.4,0
         end
         init_params = [g_init]
         final_params = [g_final]  
+    elseif contains("Roessler",sys)
+        sys_fun = (du, u, p,t) -> ns_roessler!(du, u, p, t)
+        init_params = [0.1,0.1,14f0]
+        final_params = [0.2,0.2,5.7]
     end
     if !occursin("Paper",sys)
         params = [t -> par_fun(init_params[i], final_params[i], tmax, t-t_shift) for i in axes(init_params, 1)]
