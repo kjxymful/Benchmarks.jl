@@ -195,7 +195,7 @@ end
     
 
 """
-Snapshot generator for StopBurstBN
+Snapshot generator for Bursting Neuron Systems
 """
 function BN_at_t(T::AbstractFloat;p_fun="",STD=true,pn=false,sys="StopBurstBN")
     g_init = 9.25
@@ -219,7 +219,7 @@ function BN_at_t(T::AbstractFloat;p_fun="",STD=true,pn=false,sys="StopBurstBN")
     p_sym = Symbol(p_fun)
     p_change = @eval $p_sym
     ns_sys,_ = ns_benchmark_systems(sys, p_change, tmax; transient_T=500)
-    nsts = generate_trajectories(ns_sys, 800, 20, PLOT=false, STD=false, Δt=Δt)
+    nsts = generate_trajectories(ns_sys, 1500, 20, PLOT=false, STD=false, Δt=Δt)
     g(t) = p_change(g_init, g_final, tmax, t)
     gₙₘ₀ₐ = g(T)
     ds = bursting_neuron(;gₙₘ₀ₐ)
@@ -238,7 +238,38 @@ function BN_at_t(T::AbstractFloat;p_fun="",STD=true,pn=false,sys="StopBurstBN")
     return ts
 end
 
+"""
+Snapshot generator for Roessler
+"""
+function rssl_at_t(T::AbstractFloat; p_fun="", STD=true)
+    init_params = [0.1, 0.1, 14.0f0]
+    final_params = [0.2, 0.2, 5.7]
+    tmax = 150
+    Δt = 0.01
+    TTr = 20
+    time = 0f0:Δt:tmax
+    t_id = Int(T * tmax / 0.01) + 1
+    T = time[t_id]
+    p_fun = isempty(p_fun) ? "linear" : p_fun
+    p_sym = Symbol(p_fun)
+    p_change = @eval $p_sym
+    p(t) = p_change.(init_params, final_params, Ref(tmax), Ref(t))
+    p = p(T)
+    a,b,c= p
+    ds = Systems.roessler(;a,b,c)
+    ts = Matrix(trajectory(ds, tmax, Ttr=20))
+    if STD
+        ns_sys, _ = ns_benchmark_systems("Roessler", p_change, tmax; transient_T=20)
+        nsts = generate_trajectories(ns_sys, tmax, TTr, PLOT=false, STD=false)
+        std_ = std(nsts, dims=1)
+        mean_ = mean(nsts, dims=1)
+        for i in 1:3
+            global ts[:, i] = standardize_to_nsseries(ts[:, i], mean_[i], std_[i])
+        end
+    end
+    return ts
+end
+
 function standardize_to_nsseries(u::AbstractVector, mean::AbstractFloat, std::AbstractFloat)
     return (u .- mean) ./ std
 end
-
