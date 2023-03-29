@@ -55,12 +55,16 @@ generate the trajectory of a given ns system
 
 Parameters
 ----------
-ns_model : an initalized dynamical System
-t₀ : Start time, default 0 (Float64)
-STD : true for a standardized time series
-PLOT : If a plot should be done, default true (BOOL)
-plot_title : Specifies plot title
-save_name : as what to save the file
+model: An instance of ContinuousDynamicalSystem
+T: The time to simulate the system for (Real)
+transient_T: The time to simulate the system for before saving the trajectory (Real)
+Δt: The time step to use for the simulation (Real)
+process_noise_level: The level of process noise to add to the system (Real)
+STD: Whether to standardize the trajectory (Bool)
+save_name: The name of the file to save the trajectory to (String)
+PLOT: Whether to plot the trajectory (Bool)
+plot_title: The title of the plot (String)
+
 
 *Plotting to Figures/*
 """

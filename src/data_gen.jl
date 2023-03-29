@@ -167,7 +167,7 @@ well known chaotic attractor; ρ=22->28
 ### Bursting Neuron
 The timescale is much longer than for the Lorenz, and thus needs a lot more time points
 
-- RampUpBN : Starts with the a cycle, and adds bursting loops; g=2->4
+- RampUpBN : Increases bursting behavior, g=>8.2->8.8
 
 StopBurstBN : Starts with the limit cycle, and ends in the standard bursting neuron regime; g=10.1->10.25
 
@@ -179,13 +179,15 @@ Kwargs
 ------
 p_change : Vector containing the function by which the parameters should change, default [linear, linear, linear]
 
-num_T : number of timesteps, default 15000 (Int)
+T :  final time, default 150 (Int)
 
 
 ΔT : time between steps, default 0.01 (Float)
 
 
 transient_T : timesteps used as start up to avoid transients, default 2000 (Int)
+
+u0 : Initial condition, default nothing (Vector)
 
 
 PLOT : Specifies whether a plot is done, default true (BOOL)
@@ -200,6 +202,8 @@ SAVE : Specifies whether the timeseries is saved or not, default true (BOOL)
 process_noise_level : The ratio of process noise, default 0 (Float)
 
 plot_name : the name of the file as which plot and data are saved
+
+STD : Return normalized series (Bool)
 
 Returns
 -------

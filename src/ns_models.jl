@@ -5,6 +5,13 @@ Parameters
 ----------
 sys : The type of Benchmark system (String)\n
 par_fun : the function according to which the parameters will evolve (Vector{Function})
+T : the total time of the system (Real)
+
+kwargs
+------
+u0 : the initial condition (AbstractVector)
+transient_T : the time for which the system is transient (Real)
+t₀ : the initial time (Real)
 
 Returns
 -------
