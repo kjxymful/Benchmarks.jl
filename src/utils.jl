@@ -177,7 +177,7 @@ function lorenz_at_t(T::AbstractFloat;p_fun="", STD=true)
     Δt = 0.01
     tmax = 200
     time = -600:0.01:200
-    T = time[Int(T*80000)+1]
+    T = time[Int(round(T*80000,digits=2)+1)]
     p_fun = isempty(p_fun) ? "exponential" : p_fun
     p_sym = Symbol(p_fun)
     p_change = @eval $p_sym
@@ -217,7 +217,7 @@ function BN_at_t(T::AbstractFloat;p_fun="",STD=true,pn=false,sys="StopBurstBN")
     tmax = 1500
     Δt = 0.05
     time = 0:Δt:tmax
-    t_id = Int(T*tmax/0.05)+1
+    t_id = Int(round(T*tmax/0.05,digits=2))+1
     T = time[t_id]
     p_fun = isempty(p_fun) ? "linear" : p_fun
     p_sym = Symbol(p_fun)
@@ -252,7 +252,7 @@ function rssl_at_t(T::AbstractFloat; p_fun="", STD=true)
     Δt = 0.01
     TTr = 20
     time = 0f0:Δt:tmax
-    t_id = Int(T * tmax / 0.01) + 1
+    t_id = Int(round(T * tmax / 0.01,digits=2)) + 1
     T = time[t_id]
     p_fun = isempty(p_fun) ? "linear" : p_fun
     p_sym = Symbol(p_fun)
