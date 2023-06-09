@@ -1,15 +1,23 @@
 {
-    "name": "bursting_neuron_regimes",
-    "process_noise_level" : 0.01,
-    "num_T" : 15000,
+    "name": "RampUpBN",
+    "exp_name": "RUBN",
+    
+    "process_noise_level" : 0.0,
+    "T" : 150,
     "delta_T" : 0.01,
-    "transient_T" : 2000,
+    "transient_T" : 20,
+    "p_change": "linear",
+    "STD":true,
+    
     "PLOT" : true,
-    "plot_title" : "",
+    "plot_title": "",
+    "snapshots": true,
+    "plot_params": true,
+    "MARKERS": false,
+
     "SAVE" : true,
     "save_dir" : "",
-    "num_trials" : 50,
-    "MARKERS" : false,
-    "p_change" : ["linear", "linear", "linear"],
-    "lorenz_trial_sys" : "ExplodingLorenz"
+
+    "num_trials": 50,
+    "lorenz_trial_sys" : "ShiftingLorenz"
 }
